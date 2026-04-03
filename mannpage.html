@@ -1,0 +1,1867 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Экибастуз: Город Квестов</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --secondary: #8b5cf6;
+            --accent: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --surface: #1f2937;
+            --surface-light: #374151;
+            --text: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border: #4b5563;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            --radius: 12px;
+        }
+
+        [data-theme="light"] {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #7c3aed;
+            --accent: #059669;
+            --danger: #dc2626;
+            --warning: #d97706;
+            --surface: #ffffff;
+            --surface-light: #f3f4f6;
+            --text: #111827;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--surface);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .app-header {
+            background: var(--surface-light);
+            padding: 1rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .stat-badge {
+            background: var(--surface);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+        }
+
+        .theme-toggle {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            border-color: var(--primary);
+        }
+
+        .app-content {
+            flex: 1;
+            padding: 1rem;
+            padding-bottom: 80px;
+            overflow-y: auto;
+        }
+
+        .card {
+            background: var(--surface-light);
+            border-radius: var(--radius);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 12px -2px rgba(0, 0, 0, 0.2);
+        }
+
+        .badge {
+            background: var(--primary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-accent {
+            background: var(--accent);
+        }
+
+        .btn-accent:hover {
+            background: #059669;
+        }
+
+        .btn-secondary {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            color: var(--text);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .progress-container {
+            background: var(--surface);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            transition: width 0.5s ease;
+        }
+
+        .donation-fill {
+            background: linear-gradient(90deg, var(--warning), var(--danger));
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--surface-light);
+            display: flex;
+            justify-content: space-around;
+            padding: 0.5rem;
+            box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+        }
+
+        .bottom-nav-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.75rem;
+        }
+
+        .bottom-nav-btn i {
+            font-size: 1.25rem;
+        }
+
+        .bottom-nav-btn.active {
+            color: var(--primary);
+        }
+
+        .bottom-nav-btn:hover {
+            color: var(--primary);
+        }
+
+        .map-container {
+            height: 400px;
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .quest-marker {
+            background: var(--surface-light);
+            padding: 0.5rem;
+            border-radius: 8px;
+            font-weight: bold;
+            white-space: nowrap;
+            box-shadow: var(--shadow);
+        }
+
+        .user-marker {
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 1rem;
+        }
+
+        .modal-card {
+            background: var(--surface-light);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--surface);
+            color: var(--text);
+            padding: 1rem 1.5rem;
+            border-radius: 50px;
+            box-shadow: var(--shadow);
+            z-index: 3000;
+            animation: toastSlide 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        @keyframes toastSlide {
+            from {
+                transform: translateX(-50%) translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .shop-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .shop-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.2);
+        }
+
+        .preview {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            background: var(--surface-light);
+            border-radius: 50%;
+        }
+
+        .profile-header {
+            position: relative;
+            height: 200px;
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .profile-content {
+            position: absolute;
+            bottom: 1rem;
+            left: 1rem;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 1rem;
+            border-radius: var(--radius);
+            backdrop-filter: blur(10px);
+        }
+
+        .avatar-lg {
+            width: 80px;
+            height: 80px;
+            background: var(--surface);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            margin: 0 auto;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        .stat-box {
+            background: var(--surface);
+            padding: 1rem;
+            border-radius: var(--radius);
+            text-align: center;
+        }
+
+        .stat-box h4 {
+            font-size: 1.5rem;
+            margin: 0.5rem 0;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            background: var(--surface);
+            border: none;
+            color: var(--text-muted);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .tab-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .list-item {
+            background: var(--surface-light);
+            padding: 1rem;
+            border-radius: var(--radius);
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .list-item:hover {
+            transform: translateX(4px);
+        }
+
+        .list-item.urgent {
+            border-left: 4px solid var(--danger);
+        }
+
+        .chat-container {
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            background: var(--surface);
+            border-radius: var(--radius);
+            margin-bottom: 1rem;
+        }
+
+        .chat-message {
+            margin-bottom: 1rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .chat-header {
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .chat-text {
+            background: var(--surface-light);
+            padding: 0.5rem;
+            border-radius: 8px;
+            display: inline-block;
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: var(--surface);
+            color: var(--text);
+            font-size: 1rem;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .request-card {
+            border-left: 4px solid var(--warning);
+        }
+
+        .photo-preview {
+            width: 100%;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-top: 0.5rem;
+        }
+
+        .photo-upload-btn {
+            background: var(--surface);
+            border: 2px dashed var(--border);
+            color: var(--text-muted);
+            padding: 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .photo-upload-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-muted {
+            color: var(--text-muted);
+        }
+
+        .mt-1 {
+            margin-top: 1rem;
+        }
+
+        .mb-1 {
+            margin-bottom: 1rem;
+        }
+
+        .urgent {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        input, textarea {
+            background: var(--surface);
+            color: var(--text);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem;
+            width: 100%;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .edit-profile-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .edit-profile-btn:hover {
+            background: var(--primary);
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+
+<body data-theme="dark">
+    <header class="app-header">
+        <div class="header-title">
+            <i class="fas fa-city"></i> Экибастуз
+        </div>
+        <div class="header-stats">
+            <div id="userStats" class="stat-badge" style="display: none;">
+                <i class="fas fa-coins"></i>
+                <span id="userCoins">0</span>
+            </div>
+            <div id="userLevel" class="stat-badge" style="display: none;">
+                <i class="fas fa-star"></i>
+                <span id="userLvl">1</span>
+            </div>
+            <button class="theme-toggle" onclick="toggleTheme()">
+                <i class="fas fa-moon" id="themeIcon"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="app-content" id="appRoot">
+        <!-- Динамический контент -->
+    </main>
+
+    <nav class="bottom-nav" id="bottomNav">
+        <button class="bottom-nav-btn active" data-page="map" onclick="navigateTo('map')">
+            <i class="fas fa-map"></i>
+            <span>Карта</span>
+        </button>
+        <button class="bottom-nav-btn" data-page="quests" onclick="navigateTo('quests')">
+            <i class="fas fa-tasks"></i>
+            <span>Квесты</span>
+        </button>
+        <button class="bottom-nav-btn" data-page="requests" onclick="navigateTo('requests')">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>Запросы</span>
+        </button>
+        <button class="bottom-nav-btn" data-page="chat" onclick="navigateTo('chat')">
+            <i class="fas fa-comments"></i>
+            <span>Чат</span>
+        </button>
+        <button class="bottom-nav-btn" data-page="shop" onclick="navigateTo('shop')">
+            <i class="fas fa-store"></i>
+            <span>Магазин</span>
+        </button>
+        <button class="bottom-nav-btn" data-page="profile" onclick="navigateTo('profile')">
+            <i class="fas fa-user"></i>
+            <span>Профиль</span>
+        </button>
+    </nav>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+    <script>
+        // ==========================================
+        // ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
+        // ==========================================
+        const EKIBASTUZ_COORDS = { lat: 51.7344, lng: 72.4231 };
+        let currentUser = null;
+        let allUsers = [];
+        let quests = [];
+        let donations = [];
+        let shopItems = [];
+        let submissions = [];
+        let requests = [];
+        let chatMessages = [];
+        let mapInstance = null;
+        let markersLayer = null;
+        let routingControl = null;
+        let currentPage = 'map';
+        let currentShopTab = 'avatars';
+        let onlineInterval = null;
+        let lastChatTime = 0;
+
+        // ==========================================
+        // ИНИЦИАЛИЗАЦИЯ ДАННЫХ
+        // ==========================================
+        function initData() {
+            // Загрузка пользователей
+            if (!localStorage.getItem('ekb_users')) {
+                allUsers = [
+                    {
+                        id: 'mod_1',
+                        name: 'Модератор',
+                        email: 'mod@ekb.kz',
+                        login: 'moderationforsitebeta67',
+                        password: '12345676767aoao',
+                        points: 1000,
+                        xp: 500,
+                        level: 3,
+                        avatar: '👑',
+                        background: '',
+                        completedQuests: [],
+                        location: EKIBASTUZ_COORDS,
+                        role: 'moderator',
+                        inventory: [],
+                        activeBoosts: [],
+                        isOnline: true
+                    }
+                ];
+                save('ekb_users', allUsers);
+            } else allUsers = load('ekb_users');
+
+            // Загрузка квестов
+            if (!localStorage.getItem('ekb_quests')) {
+                quests = [
+                    {
+                        id: 'q1',
+                        title: 'Уборка парка',
+                        description: 'Собери мусор в центральном парке',
+                        xpReward: 150,
+                        coinReward: 75,
+                        lat: 51.7344,
+                        lng: 72.4231,
+                        creatorId: 'mod_1',
+                        status: 'active',
+                        isUrgent: true
+                    },
+                    {
+                        id: 'q2',
+                        title: 'Помощь пожилым',
+                        description: 'Помоги пожилым соседям с продуктами',
+                        xpReward: 200,
+                        coinReward: 100,
+                        lat: 51.7350,
+                        lng: 72.4240,
+                        creatorId: 'mod_1',
+                        status: 'active',
+                        isUrgent: false
+                    },
+                    {
+                        id: 'q3',
+                        title: 'Посадка деревьев',
+                        description: 'Участвуй в акции по озеленению города',
+                        xpReward: 300,
+                        coinReward: 150,
+                        lat: 51.7330,
+                        lng: 72.4220,
+                        creatorId: 'mod_1',
+                        status: 'active',
+                        isUrgent: false
+                    }
+                ];
+                save('ekb_quests', quests);
+            } else quests = load('ekb_quests');
+
+            // Загрузка пожертвований
+            if (!localStorage.getItem('ekb_donations')) {
+                donations = [
+                    {
+                        id: 'd1',
+                        title: 'Ремонт детской площадки',
+                        description: 'Сбор средств на обновление игрового оборудования',
+                        img: '🏞️',
+                        current: 250,
+                        goal: 2000
+                    },
+                    {
+                        id: 'd2',
+                        title: 'Освещение улиц',
+                        description: 'Установка новых фонарей в темных районах',
+                        img: '💡',
+                        current: 500,
+                        goal: 3000
+                    }
+                ];
+                save('ekb_donations', donations);
+            } else donations = load('ekb_donations');
+
+            // Загрузка магазина
+            if (!localStorage.getItem('ekb_shop')) {
+                shopItems = [
+                    { id: 's_av1', name: 'Герой', type: 'avatar', emoji: '🦸', price: 200, desc: 'Супергеройский образ' },
+                    { id: 's_av2', name: 'Робот', type: 'avatar', emoji: '🤖', price: 300, desc: 'Технологичный аватар' },
+                    { id: 's_av3', name: 'Космонавт', type: 'avatar', emoji: '🧑‍🚀', price: 500, desc: 'Выше звезд' },
+                    { id: 's_av4', name: 'Дракон', type: 'avatar', emoji: '🐲', price: 1000, desc: 'Мифическая редкость' },
+                    { id: 's_bg1', name: 'Неон-Сити', type: 'background', value: 'url(https://images.unsplash.com/photo-1555680202-c86f0e12f086?q=80&w=1000&auto=format&fit=crop)', price: 800, desc: 'Киберпанк атмосфера' },
+                    { id: 's_bg2', name: 'Закат в степи', type: 'background', value: 'url(https://images.unsplash.com/photo-1513622470522-26c308a34d25?q=80&w=1000&auto=format&fit=crop)', price: 600, desc: 'Родные просторы' },
+                    { id: 's_bg3', name: 'Космос', type: 'background', value: 'url(https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=1000&auto=format&fit=crop)', price: 1200, desc: 'Глубокий космос' },
+                    { id: 's_bs1', name: 'Кольцо Усердия', type: 'boost', value: 'xp_1.5', price: 400, desc: '+50% XP на 24 часа' },
+                    { id: 's_bs2', name: 'Магнит Монет', type: 'boost', value: 'coin_2.0', price: 600, desc: 'x2 Монет на 24 часа' }
+                ];
+                save('ekb_shop', shopItems);
+            } else shopItems = load('ekb_shop');
+
+            // Загрузка заявок
+            if (!localStorage.getItem('ekb_submissions')) {
+                submissions = [];
+                save('ekb_submissions', submissions);
+            } else submissions = load('ekb_submissions');
+
+            // Загрузка запросов
+            if (!localStorage.getItem('ekb_requests')) {
+                requests = [];
+                save('ekb_requests', requests);
+            } else requests = load('ekb_requests');
+
+            // Загрузка чата
+            if (!localStorage.getItem('ekb_chat')) {
+                chatMessages = [
+                    { userId: 'mod_1', userName: 'Модератор', text: 'Добро пожаловать в городской чат!', time: Date.now() - 3600000 }
+                ];
+                save('ekb_chat', chatMessages);
+            } else chatMessages = load('ekb_chat');
+        }
+
+        // Утилиты сохранения/загрузки
+        function save(key, data) { localStorage.setItem(key, JSON.stringify(data)); }
+        function load(key) { return JSON.parse(localStorage.getItem(key)); }
+
+        function showToast(msg, icon = '🔔') {
+            const div = document.createElement('div');
+            div.className = 'toast';
+            div.innerHTML = `<span>${icon}</span> ${msg}`;
+            document.body.appendChild(div);
+            setTimeout(() => div.remove(), 2800);
+        }
+
+        // Валидация email
+        function isValidEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        // ==========================================
+        // ПЕРЕКЛЮЧЕНИЕ ТЕМЫ
+        // ==========================================
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('themeIcon');
+            const currentTheme = body.getAttribute('data-theme');
+            
+            if (currentTheme === 'dark') {
+                body.setAttribute('data-theme', 'light');
+                icon.className = 'fas fa-sun';
+                localStorage.setItem('ekb_theme', 'light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                icon.className = 'fas fa-moon';
+                localStorage.setItem('ekb_theme', 'dark');
+            }
+            
+            // Обновляем карту если она открыта
+            if (mapInstance && currentPage === 'map') {
+                setTimeout(() => {
+                    mapInstance.invalidateSize();
+                }, 300);
+            }
+        }
+
+        // ==========================================
+        // ИГРОВАЯ ЛОГИКА & БУСТЫ
+        // ==========================================
+        function calcLevel(xp) {
+            return Math.floor(1 + Math.sqrt(xp / 100));
+        }
+
+        function getMultiplier(type) {
+            if (!currentUser || !currentUser.activeBoosts) return 1;
+            let mult = 1;
+            const now = Date.now();
+            currentUser.activeBoosts = currentUser.activeBoosts.filter(b => b.expires > now);
+            currentUser.activeBoosts.forEach(b => {
+                if (b.type.startsWith(type)) mult *= parseFloat(b.type.split('_')[1]);
+            });
+            return mult;
+        }
+
+        function addRewards(userId, xpBase, coinBase) {
+            const user = allUsers.find(u => u.id === userId);
+            if (!user) return;
+
+            let xpG = xpBase, coinG = coinBase;
+            if (currentUser && currentUser.id === userId) {
+                xpG = Math.floor(xpBase * getMultiplier('xp'));
+                coinG = Math.floor(coinBase * getMultiplier('coin'));
+            }
+
+            user.xp = (user.xp || 0) + xpG;
+            user.points = (user.points || 0) + coinG;
+
+            const newLvl = calcLevel(user.xp);
+            let lvlUp = false;
+            if (newLvl > user.level) {
+                user.level = newLvl;
+                lvlUp = true;
+            }
+
+            if (currentUser && currentUser.id === userId) {
+                currentUser = { ...user };
+                updateUserStats();
+                showToast(`+${xpG} XP | +${coinG} 🪙`, '🎉');
+                if (lvlUp) setTimeout(() => showToast(`Уровень повышен до ${newLvl}!`, '🔥'), 1000);
+            }
+            save('ekb_users', allUsers);
+        }
+
+        function donate(donationId, amount) {
+            if (!currentUser) return showToast('Сначала войдите', '❌');
+            if (currentUser.points < amount) return showToast('Недостаточно монет!', '💸');
+
+            const don = donations.find(d => d.id === donationId);
+            if (!don) return;
+
+            currentUser.points -= amount;
+            don.current += amount;
+
+            const dbU = allUsers.find(u => u.id === currentUser.id);
+            if (dbU) dbU.points = currentUser.points;
+            save('ekb_users', allUsers);
+            save('ekb_donations', donations);
+
+            updateUserStats();
+            showToast(`Вы пожертвовали ${amount}🪙`, '❤️');
+            renderCurrentPage();
+        }
+
+        // Симуляция онлайн-юзеров
+        function simulateOnlineUsers() {
+            if (onlineInterval) clearInterval(onlineInterval);
+            onlineInterval = setInterval(() => {
+                let moved = false;
+                allUsers.forEach(u => {
+                    if (u.id !== (currentUser?.id) && u.isOnline) {
+                        u.location.lat += (Math.random() - 0.5) * 0.002;
+                        u.location.lng += (Math.random() - 0.5) * 0.002;
+                        moved = true;
+                    }
+                });
+                if (moved && currentPage === 'map' && mapInstance) refreshMapMarkers();
+            }, 5000);
+        }
+
+        // ==========================================
+        // КАРТА LEAFLET
+        // ==========================================
+        function initMap(containerId) {
+            if (mapInstance) {
+                mapInstance.remove();
+                mapInstance = null;
+            }
+            const center = currentUser?.location || EKIBASTUZ_COORDS;
+
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            const tileUrl = isDark
+                ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+                : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+
+            mapInstance = L.map(containerId, { zoomControl: false }).setView([center.lat, center.lng], 14);
+            L.tileLayer(tileUrl, {
+                attribution: '© OpenStreetMap contributors © CARTO'
+            }).addTo(mapInstance);
+
+            L.control.zoom({ position: 'topright' }).addTo(mapInstance);
+            markersLayer = L.layerGroup().addTo(mapInstance);
+
+            refreshMapMarkers();
+        }
+
+        function refreshMapMarkers() {
+            if (!markersLayer) return;
+            markersLayer.clearLayers();
+
+            // Рисуем квесты
+            quests.filter(q => q.status === 'active').forEach(q => {
+                const isUrg = q.isUrgent ? 'border-color: var(--danger); background: #450a0a;' : '';
+                const html = `<div class="quest-marker" style="${isUrg}"><i class="fas fa-star" style="color:var(--accent)"></i> ${q.title.split(' ')[0]}</div>`;
+                const icon = L.divIcon({ html, className: '', iconSize: [120, 30], iconAnchor: [60, 15] });
+                const m = L.marker([q.lat, q.lng], { icon }).addTo(markersLayer);
+
+                m.bindPopup(`
+                    <h4 style="margin-bottom:5px; color:var(--primary)">${q.title}</h4>
+                    <p style="font-size:0.85rem; margin-bottom:10px;">${q.description}</p>
+                    <div class="flex-between mb-1">
+                        <span class="badge"><i class="fas fa-arrow-up"></i> ${q.xpReward} XP</span>
+                        <span class="badge"><i class="fas fa-coins"></i> ${q.coinReward}</span>
+                    </div>
+                    <button class="btn btn-primary" style="width:100%; padding:8px;" onclick="startRouting(${q.lat}, ${q.lng})"><i class="fas fa-route"></i> Путь</button>
+                    <button class="btn btn-outline mt-1" style="width:100%; padding:8px;" onclick="openQuestSubmit('${q.id}')"><i class="fas fa-camera"></i> Выполнить</button>
+                `);
+            });
+
+            // Рисуем запросы
+            requests.filter(r => r.status === 'pending').forEach(r => {
+                const html = `<div class="quest-marker" style="border-color: var(--warning); background: #451a03;"><i class="fas fa-exclamation-triangle" style="color:var(--warning)"></i> Запрос</div>`;
+                const icon = L.divIcon({ html, className: '', iconSize: [120, 30], iconAnchor: [60, 15] });
+                const m = L.marker([r.lat, r.lng], { icon }).addTo(markersLayer);
+
+                m.bindPopup(`
+                    <h4 style="margin-bottom:5px; color:var(--warning)">${r.title}</h4>
+                    <p style="font-size:0.85rem; margin-bottom:10px;">${r.description}</p>
+                    ${r.photo ? `<img src="${r.photo}" class="photo-preview" style="max-width: 200px;">` : ''}
+                    <p style="font-size:0.75rem; color:var(--text-muted); margin-top:5px;">Автор: ${r.userName}</p>
+                `);
+            });
+
+            // Рисуем других пользователей
+            allUsers.forEach(u => {
+                if (u.isOnline && u.id !== currentUser?.id) {
+                    const html = `<div class="user-marker" style="font-size: 2rem;">${u.avatar}</div>`;
+                    const m = L.marker([u.location.lat, u.location.lng], { icon: L.divIcon({ html, className: '' }) }).addTo(markersLayer);
+                    m.bindPopup(`<b>${u.name}</b><br>Уровень: ${u.level}`);
+                }
+            });
+
+            // Рисуем себя
+            if (currentUser) {
+                const html = `<div class="user-marker" style="font-size: 2.5rem; filter: drop-shadow(0 0 10px var(--primary));">${currentUser.avatar}</div>`;
+                const m = L.marker([currentUser.location.lat, currentUser.location.lng], { icon: L.divIcon({ html, className: '' }) }).addTo(markersLayer);
+                m.bindPopup(`<b>Ты здесь</b>`);
+            }
+        }
+
+        window.startRouting = (lat, lng) => {
+            if (!currentUser) return showToast('Нужна авторизация', '❌');
+            if (routingControl) mapInstance.removeControl(routingControl);
+
+            routingControl = L.Routing.control({
+                waypoints: [L.latLng(currentUser.location.lat, currentUser.location.lng), L.latLng(lat, lng)],
+                routeWhileDragging: false,
+                addWaypoints: false,
+                fitSelectedRoutes: true,
+                lineOptions: { styles: [{ color: '#10b981', weight: 6, opacity: 0.8 }] },
+                show: false
+            }).addTo(mapInstance);
+            mapInstance.closePopup();
+        }
+
+        function updateGeo() {
+            if (!navigator.geolocation) return showToast('Геолокация не поддерживается');
+            navigator.geolocation.getCurrentPosition(
+                p => {
+                    if (currentUser) {
+                        currentUser.location = { lat: p.coords.latitude, lng: p.coords.longitude };
+                        const dbU = allUsers.find(u => u.id === currentUser.id);
+                        if (dbU) dbU.location = currentUser.location;
+                        save('ekb_users', allUsers);
+                    }
+                    if (mapInstance) {
+                        mapInstance.setView([p.coords.latitude, p.coords.longitude], 15);
+                        refreshMapMarkers();
+                    }
+                    showToast('Координаты обновлены', '📍');
+                },
+                () => showToast('Ошибка доступа к GPS', '⚠️')
+            );
+        }
+
+        // ==========================================
+        // РЕНДЕР СТРАНИЦ
+        // ==========================================
+        function renderMap() {
+            const root = document.getElementById('appRoot');
+            root.innerHTML = `
+                <div class="card" style="padding:1rem;">
+                    <div class="flex-between mb-1">
+                        <h3><i class="fas fa-map-marked-alt text-primary"></i> Экибастуз</h3>
+                        <div>
+                            <button class="btn btn-outline" style="padding:8px 12px;" onclick="updateGeo()"><i class="fas fa-crosshairs"></i></button>
+                            ${(currentUser?.role === 'moderator' || currentUser?.role === 'creator') ? `<button class="btn btn-primary" style="padding:8px 12px;" onclick="createNewQuest()"><i class="fas fa-plus"></i> Квест</button>` : ''}
+                        </div>
+                    </div>
+                    <div id="mainMap" class="map-container"></div>
+                </div>
+                
+                <h3 class="mb-1">⚡ Срочные задания</h3>
+                <div id="urgentQuestsList"></div>
+            `;
+
+            setTimeout(() => initMap('mainMap'), 100);
+
+            const urgent = quests.filter(q => q.status === 'active' && q.isUrgent);
+            const uList = document.getElementById('urgentQuestsList');
+            if (urgent.length === 0) uList.innerHTML = '<p class="text-muted">Сейчас нет срочных заданий.</p>';
+            else {
+                uList.innerHTML = urgent.map(q => `
+                    <div class="list-item urgent flex-between">
+                        <div>
+                            <h4 style="color:var(--danger)">${q.title}</h4>
+                            <div class="badge mt-1">${q.xpReward} XP | ${q.coinReward} 🪙</div>
+                        </div>
+                        <button class="btn btn-danger" onclick="openQuestSubmit('${q.id}')">Взять</button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function renderQuests() {
+            const root = document.getElementById('appRoot');
+            const activeQs = quests.filter(q => q.status === 'active');
+
+            root.innerHTML = `
+                <h2><i class="fas fa-clipboard-list"></i> Доступные квесты</h2>
+                <p class="text-muted mb-1">Выполняй задания и получай награды.</p>
+                <div id="questsContainer">
+                    ${activeQs.map(q => `
+                        <div class="card" style="border-left: 5px solid ${q.isUrgent ? 'var(--danger)' : 'var(--primary)'}">
+                            <h3>${q.title}</h3>
+                            <p class="text-muted mt-1" style="font-size:0.9rem;">${q.description}</p>
+                            <div class="flex-between mt-1" style="margin-top:1.5rem;">
+                                <div>
+                                    <span class="badge"><i class="fas fa-star"></i> ${q.xpReward}</span>
+                                    <span class="badge"><i class="fas fa-coins"></i> ${q.coinReward}</span>
+                                </div>
+                                <button class="btn btn-primary" onclick="openQuestSubmit('${q.id}')">Выполнить</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function renderRequests() {
+            const root = document.getElementById('appRoot');
+            const pendingReqs = requests.filter(r => r.status === 'pending');
+
+            root.innerHTML = `
+                <div class="flex-between mb-1">
+                    <h2><i class="fas fa-exclamation-triangle"></i> Запросы жителей</h2>
+                    ${currentUser ? `<button class="btn btn-primary" onclick="openNewRequest()"><i class="fas fa-plus"></i> Новый запрос</button>` : ''}
+                </div>
+                <p class="text-muted mb-1">Сообщайте о проблемах в городе.</p>
+                
+                ${pendingReqs.length === 0 ? '<p class="text-muted">Нет активных запросов.</p>' : ''}
+                ${pendingReqs.map(r => `
+                    <div class="card request-card">
+                        <div class="flex-between mb-1">
+                            <h3>${r.title}</h3>
+                            <span class="badge" style="background: var(--warning)">${r.category}</span>
+                        </div>
+                        <p class="text-muted">${r.description}</p>
+                        ${r.photo ? `<img src="${r.photo}" class="photo-preview">` : ''}
+                        <div class="flex-between mt-1">
+                            <span class="text-muted" style="font-size:0.85rem;">Автор: ${r.userName}</span>
+                            ${currentUser?.role === 'moderator' ? `
+                                <div>
+                                    <button class="btn btn-primary" style="padding:6px 12px;" onclick="approveRequest('${r.id}')">Одобрить</button>
+                                    <button class="btn btn-outline" style="padding:6px 12px; margin-left:5px;" onclick="rejectRequest('${r.id}')">Отклонить</button>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `).join('')}
+            `;
+        }
+
+        function renderChat() {
+            const root = document.getElementById('appRoot');
+            
+            root.innerHTML = `
+                <h2><i class="fas fa-comments"></i> Городской чат</h2>
+                <div class="chat-container">
+                    <div class="chat-messages" id="chatMessages">
+                        ${chatMessages.slice(-50).map(msg => `
+                            <div class="chat-message">
+                                <div class="chat-header">${msg.userName}</div>
+                                <div class="chat-text">${msg.text}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    ${currentUser ? `
+                        <div class="chat-input-container">
+                            <input type="text" id="chatInput" class="chat-input" placeholder="Напишите сообщение..." maxlength="200">
+                            <button class="btn btn-primary" onclick="sendChatMessage()"><i class="fas fa-paper-plane"></i></button>
+                        </div>
+                    ` : '<p class="text-muted text-center">Войдите чтобы участвовать в чате</p>'}
+                </div>
+            `;
+            
+            // Прокрутка к последнему сообщению
+            const chatDiv = document.getElementById('chatMessages');
+            if (chatDiv) chatDiv.scrollTop = chatDiv.scrollHeight;
+            
+            // Обработка Enter
+            const input = document.getElementById('chatInput');
+            if (input) {
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') sendChatMessage();
+                });
+            }
+        }
+
+        function renderShop() {
+            if (!currentUser) return showAuthWall();
+
+            const root = document.getElementById('appRoot');
+            root.innerHTML = `
+                <div class="flex-between mb-1">
+                    <h2><i class="fas fa-store"></i> Лавка редкостей</h2>
+                    <div class="badge" style="font-size:1rem;"><i class="fas fa-coins"></i> ${currentUser.points}</div>
+                </div>
+                
+                <div class="tabs">
+                    <button class="tab-btn ${currentShopTab === 'avatars' ? 'active' : ''}" onclick="currentShopTab='avatars'; renderShop()">Аватары</button>
+                    <button class="tab-btn ${currentShopTab === 'backgrounds' ? 'active' : ''}" onclick="currentShopTab='backgrounds'; renderShop()">Фоны профиля</button>
+                    <button class="tab-btn ${currentShopTab === 'boosts' ? 'active' : ''}" onclick="currentShopTab='boosts'; renderShop()">Бусты</button>
+                </div>
+                
+                <div class="shop-grid">
+                    ${shopItems.filter(i => i.type === (currentShopTab === 'backgrounds' ? 'background' : currentShopTab === 'boosts' ? 'boost' : 'avatar')).map(item => {
+                        const hasItem = currentUser.inventory.includes(item.id);
+                        let btnHtml = '';
+                        if (item.type === 'boost') {
+                            btnHtml = `<button class="btn btn-accent" style="width:100%; padding:8px;" onclick="buyItem('${item.id}')">${item.price} 🪙</button>`;
+                        } else {
+                            btnHtml = hasItem
+                                ? `<button class="btn btn-outline" style="width:100%; padding:8px; border-color:var(--success); color:var(--success)" onclick="equipItem('${item.id}')">Экипировать</button>`
+                                : `<button class="btn btn-primary" style="width:100%; padding:8px;" onclick="buyItem('${item.id}')">${item.price} 🪙</button>`;
+                        }
+
+                        return `
+                            <div class="shop-card">
+                                <div class="preview" ${item.type === 'background' ? `style="background: ${item.value}; background-size:cover; border-radius:12px;"` : ''}>
+                                    ${item.type === 'avatar' ? item.emoji : item.type === 'boost' ? '⚡' : ''}
+                                </div>
+                                <h4 style="font-size:0.9rem;">${item.name}</h4>
+                                <p class="text-muted mb-1" style="font-size:0.75rem;">${item.desc}</p>
+                                ${btnHtml}
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function renderProfile() {
+            if (!currentUser) return showAuthWall();
+            const root = document.getElementById('appRoot');
+
+            const xpForNext = Math.pow(currentUser.level, 2) * 100;
+            const xpCurrentLvl = Math.pow(currentUser.level - 1, 2) * 100;
+            const progress = Math.max(0, Math.min(100, ((currentUser.xp - xpCurrentLvl) / (xpForNext - xpCurrentLvl)) * 100));
+
+            let boostHtml = '';
+            if (currentUser.activeBoosts && currentUser.activeBoosts.length > 0) {
+                boostHtml = `
+                    <div class="card" style="border:1px solid var(--accent)">
+                        <h4><i class="fas fa-bolt" style="color:var(--accent)"></i> Активные бусты</h4>
+                        ${currentUser.activeBoosts.map(b => `<div class="badge mt-1">${b.type.replace('_', ' x')} (до ${new Date(b.expires).toLocaleTimeString()})</div>`).join('')}
+                    </div>
+                `;
+            }
+
+            root.innerHTML = `
+                <div class="profile-header" style="background-image: ${currentUser.background || 'none'}; background-color: var(--surface-light);">
+                    <button class="edit-profile-btn" onclick="openEditProfile()"><i class="fas fa-edit"></i></button>
+                    <div class="profile-content">
+                        <div class="avatar-lg">${currentUser.avatar}</div>
+                        <h2 class="mt-1">${currentUser.name}</h2>
+                        <p class="text-muted">${currentUser.role === 'moderator' ? '👑 Модератор' : 'Волонтёр Экибастуза'}</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="flex-between">
+                        <h3>Уровень ${currentUser.level}</h3>
+                        <span class="text-muted">${currentUser.xp} / ${xpForNext} XP</span>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-fill" style="width: ${progress}%"></div>
+                    </div>
+                    
+                    <div class="grid-2 mt-1">
+                        <div class="stat-box">
+                            <i class="fas fa-coins text-accent"></i>
+                            <h4>${currentUser.points}</h4>
+                            <span class="text-muted" style="font-size:0.8rem">Монет</span>
+                        </div>
+                        <div class="stat-box">
+                            <i class="fas fa-check-circle text-primary"></i>
+                            <h4>${currentUser.completedQuests?.length || 0}</h4>
+                            <span class="text-muted" style="font-size:0.8rem">Квестов</span>
+                        </div>
+                    </div>
+                </div>
+
+                ${boostHtml}
+
+                <button class="btn btn-danger" style="width:100%" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Выйти из аккаунта</button>
+            `;
+        }
+
+        function renderMod() {
+            if (!currentUser || currentUser.role !== 'moderator') return;
+            const root = document.getElementById('appRoot');
+            const pends = submissions.filter(s => s.status === 'pending');
+            const reqPends = requests.filter(r => r.status === 'pending');
+
+            root.innerHTML = `
+                <h2><i class="fas fa-shield-alt"></i> Панель Модератора</h2>
+                
+                <div class="card">
+                    <h3>Заявки на выполнение квестов (${pends.length})</h3>
+                    ${pends.length === 0 ? '<p class="text-muted">Нет заявок на проверку.</p>' : ''}
+                    ${pends.map(sub => {
+                        const q = quests.find(x => x.id === sub.questId);
+                        return `
+                            <div class="card" style="margin-top: 1rem;">
+                                <div class="flex-between mb-1">
+                                    <b>👤 ${sub.userName}</b>
+                                    <span class="badge">Квест: ${q?.title || 'Удален'}</span>
+                                </div>
+                                <p class="mb-1"><i>"${sub.comment}"</i></p>
+                                ${sub.photo ? `<img src="${sub.photo}" class="photo-preview">` : ''}
+                                <div class="grid-2">
+                                    <button class="btn btn-primary" onclick="resolveSub('${sub.id}', true)"><i class="fas fa-check"></i> Одобрить</button>
+                                    <button class="btn btn-outline" style="color:var(--danger); border-color:var(--danger)" onclick="resolveSub('${sub.id}', false)"><i class="fas fa-times"></i> Отклонить</button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+
+                <div class="card" style="margin-top: 1rem;">
+                    <h3>Запросы на создание заданий (${reqPends.length})</h3>
+                    ${reqPends.length === 0 ? '<p class="text-muted">Нет новых запросов.</p>' : ''}
+                    ${reqPends.map(req => `
+                        <div class="card" style="margin-top: 1rem;">
+                            <div class="flex-between mb-1">
+                                <b>${req.title}</b>
+                                <span class="badge" style="background: var(--warning)">${req.category}</span>
+                            </div>
+                            <p class="text-muted">${req.description}</p>
+                            ${req.photo ? `<img src="${req.photo}" class="photo-preview">` : ''}
+                            <p class="text-muted" style="font-size:0.85rem;">Автор: ${req.userName}</p>
+                            <div class="grid-2">
+                                <button class="btn btn-primary" onclick="approveRequest('${req.id}')"><i class="fas fa-check"></i> Создать квест</button>
+                                <button class="btn btn-outline" style="color:var(--danger); border-color:var(--danger)" onclick="rejectRequest('${req.id}')"><i class="fas fa-times"></i> Отклонить</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // ==========================================
+        // ЛОГИКА ДЕЙСТВИЙ
+        // ==========================================
+        function buyItem(id) {
+            const item = shopItems.find(i => i.id === id);
+            if (!item) return;
+            if (currentUser.points < item.price) return showToast('Не хватает монет!', '💸');
+
+            currentUser.points -= item.price;
+
+            if (item.type === 'boost') {
+                if (!currentUser.activeBoosts) currentUser.activeBoosts = [];
+                currentUser.activeBoosts.push({ type: item.value, expires: Date.now() + 86400000 });
+                showToast(`Буст ${item.name} активирован!`, '⚡');
+            } else {
+                if (currentUser.inventory.includes(id)) return showToast('Уже куплено', '⚠️');
+                currentUser.inventory.push(id);
+                equipItem(id);
+                showToast('Покупка успешна!', '🛍️');
+            }
+
+            syncCurrentUser();
+            updateUserStats();
+            renderShop();
+        }
+
+        function equipItem(id) {
+            const item = shopItems.find(i => i.id === id);
+            if (item.type === 'avatar') currentUser.avatar = item.emoji;
+            if (item.type === 'background') currentUser.background = item.value;
+            syncCurrentUser();
+            showToast('Экипировано', '✨');
+        }
+
+        function syncCurrentUser() {
+            const dbU = allUsers.find(u => u.id === currentUser.id);
+            if (dbU) {
+                Object.assign(dbU, currentUser);
+                save('ekb_users', allUsers);
+            }
+        }
+
+        function updateUserStats() {
+            if (currentUser) {
+                document.getElementById('userStats').style.display = 'flex';
+                document.getElementById('userLevel').style.display = 'flex';
+                document.getElementById('userCoins').textContent = currentUser.points;
+                document.getElementById('userLvl').textContent = currentUser.level;
+            } else {
+                document.getElementById('userStats').style.display = 'none';
+                document.getElementById('userLevel').style.display = 'none';
+            }
+        }
+
+        window.openQuestSubmit = (qId) => {
+            if (!currentUser) return showToast('Сначала войдите', '❌');
+            const q = quests.find(x => x.id === qId);
+
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
+                <div class="modal-card">
+                    <h3 class="mb-1">${q.title}</h3>
+                    <p class="text-muted mb-1">Опиши, что было сделано, и прикрепи фото.</p>
+                    <textarea id="subComment" rows="3" placeholder="Я убрал весь мусор..."></textarea>
+                    <div class="photo-upload-btn" onclick="document.getElementById('photoInput').click()">
+                        <i class="fas fa-camera" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                        <p>Нажмите чтобы загрузить фото</p>
+                    </div>
+                    <input type="file" id="photoInput" accept="image/*" style="display: none;" onchange="handlePhotoUpload(event)">
+                    <img id="photoPreview" class="photo-preview" style="display: none;">
+                    <div class="grid-2">
+                        <button class="btn btn-outline" onclick="this.closest('.modal-overlay').remove()">Отмена</button>
+                        <button class="btn btn-primary" id="sendSubBtn">Отправить</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            modal.querySelector('#sendSubBtn').onclick = () => {
+                const comment = modal.querySelector('#subComment').value;
+                const photo = modal.querySelector('#photoPreview').src;
+                if (!comment) return showToast('Добавь описание!', '⚠️');
+                if (!photo || photo === '') return showToast('Прикрепите фото!', '⚠️');
+
+                submissions.push({
+                    id: 'sub_' + Date.now(),
+                    questId: qId,
+                    userId: currentUser.id,
+                    userName: currentUser.name,
+                    comment,
+                    photo,
+                    status: 'pending',
+                    time: Date.now()
+                });
+                save('ekb_submissions', submissions);
+
+                showToast('Отправлено на проверку', '✅');
+                modal.remove();
+            };
+        };
+
+        window.handlePhotoUpload = (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('photoPreview');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        window.resolveSub = (subId, isApproved) => {
+            const sub = submissions.find(s => s.id === subId);
+            if (!sub) return;
+
+            sub.status = isApproved ? 'approved' : 'rejected';
+            save('ekb_submissions', submissions);
+
+            if (isApproved) {
+                const q = quests.find(x => x.id === sub.questId);
+                if (q) {
+                    addRewards(sub.userId, q.xpReward, q.coinReward);
+                    const u = allUsers.find(user => user.id === sub.userId);
+                    if (u) {
+                        if (!u.completedQuests) u.completedQuests = [];
+                        u.completedQuests.push(q.id);
+                        save('ekb_users', allUsers);
+                    }
+                }
+            }
+            showToast(isApproved ? 'Одобрено' : 'Отклонено');
+            renderMod();
+        };
+
+        window.createNewQuest = () => {
+            const center = mapInstance.getCenter();
+            const title = prompt('Название задания (например: Очистка двора)');
+            if (!title) return;
+            const desc = prompt('Описание задачи:');
+            quests.push({
+                id: 'q_' + Date.now(),
+                title,
+                description: desc,
+                xpReward: 100,
+                coinReward: 50,
+                lat: center.lat,
+                lng: center.lng,
+                creatorId: currentUser.id,
+                status: 'active',
+                isUrgent: false
+            });
+            save('ekb_quests', quests);
+            showToast('Задание добавлено на карту!', '📍');
+            refreshMapMarkers();
+        };
+
+        // Чат
+        function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            
+            if (!text) return;
+            
+            const now = Date.now();
+            if (now - lastChatTime < 60000) {
+                const remaining = Math.ceil((60000 - (now - lastChatTime)) / 1000);
+                return showToast(`Подождите ${remaining} секунд`, '⏱️');
+            }
+            
+            lastChatTime = now;
+            
+            chatMessages.push({
+                userId: currentUser.id,
+                userName: currentUser.name,
+                text,
+                time: now
+            });
+            
+            save('ekb_chat', chatMessages);
+            input.value = '';
+            renderChat();
+            showToast('Сообщение отправлено', '💬');
+        }
+
+        // Запросы
+        window.openNewRequest = () => {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
+                <div class="modal-card">
+                    <h3 class="mb-1">Новый запрос</h3>
+                    <input type="text" id="reqTitle" placeholder="Название проблемы">
+                    <select id="reqCategory" style="margin-bottom: 1rem;">
+                        <option value="Мусор">Мусор</option>
+                        <option value="Дороги">Дороги</option>
+                        <option value="Освещение">Освещение</option>
+                        <option value="Парки">Парки</option>
+                        <option value="Другое">Другое</option>
+                    </select>
+                    <textarea id="reqDesc" rows="3" placeholder="Опишите проблему подробно..."></textarea>
+                    <div class="photo-upload-btn" onclick="document.getElementById('reqPhotoInput').click()">
+                        <i class="fas fa-camera" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                        <p>Прикрепить фото (необязательно)</p>
+                    </div>
+                    <input type="file" id="reqPhotoInput" accept="image/*" style="display: none;" onchange="handleReqPhotoUpload(event)">
+                    <img id="reqPhotoPreview" class="photo-preview" style="display: none;">
+                    <div class="grid-2">
+                        <button class="btn btn-outline" onclick="this.closest('.modal-overlay').remove()">Отмена</button>
+                        <button class="btn btn-primary" onclick="submitRequest()">Отправить</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        };
+
+        window.handleReqPhotoUpload = (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('reqPhotoPreview');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        function submitRequest() {
+            const title = document.getElementById('reqTitle').value.trim();
+            const category = document.getElementById('reqCategory').value;
+            const desc = document.getElementById('reqDesc').value.trim();
+            const photo = document.getElementById('reqPhotoPreview').src;
+            
+            if (!title || !desc) return showToast('Заполните все поля!', '⚠️');
+            
+            requests.push({
+                id: 'req_' + Date.now(),
+                title,
+                category,
+                description: desc,
+                photo: photo && photo !== '' ? photo : null,
+                userId: currentUser.id,
+                userName: currentUser.name,
+                lat: currentUser.location.lat + (Math.random() - 0.5) * 0.01,
+                lng: currentUser.location.lng + (Math.random() - 0.5) * 0.01,
+                status: 'pending',
+                time: Date.now()
+            });
+            
+            save('ekb_requests', requests);
+            showToast('Запрос отправлен на рассмотрение', '📝');
+            document.querySelector('.modal-overlay').remove();
+            renderRequests();
+        }
+
+        window.approveRequest = (reqId) => {
+            const req = requests.find(r => r.id === reqId);
+            if (!req) return;
+            
+            // Создаем квест из запроса
+            quests.push({
+                id: 'q_' + Date.now(),
+                title: req.title,
+                description: req.description,
+                xpReward: 150,
+                coinReward: 75,
+                lat: req.lat,
+                lng: req.lng,
+                creatorId: 'mod_1',
+                status: 'active',
+                isUrgent: req.category === 'Мусор'
+            });
+            
+            req.status = 'approved';
+            save('ekb_quests', quests);
+            save('ekb_requests', requests);
+            
+            showToast('Квест создан из запроса!', '✅');
+            renderMod();
+            if (currentPage === 'map') refreshMapMarkers();
+        };
+
+        window.rejectRequest = (reqId) => {
+            const req = requests.find(r => r.id === reqId);
+            if (!req) return;
+            
+            req.status = 'rejected';
+            save('ekb_requests', requests);
+            
+            showToast('Запрос отклонен', '❌');
+            renderMod();
+            if (currentPage === 'requests') renderRequests();
+        };
+
+        // Редактирование профиля
+        window.openEditProfile = () => {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
+                <div class="modal-card">
+                    <h3 class="mb-1">Редактирование профиля</h3>
+                    <input type="text" id="editName" value="${currentUser.name}" placeholder="Имя">
+                    <input type="email" id="editEmail" value="${currentUser.email || ''}" placeholder="Email">
+                    <input type="text" id="editLogin" value="${currentUser.login}" placeholder="Логин">
+                    <input type="password" id="editPass" placeholder="Новый пароль (оставьте пустым если не менять)">
+                    <div class="grid-2">
+                        <button class="btn btn-outline" onclick="this.closest('.modal-overlay').remove()">Отмена</button>
+                        <button class="btn btn-primary" onclick="saveProfile()">Сохранить</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        };
+
+        window.saveProfile = () => {
+            const name = document.getElementById('editName').value.trim();
+            const email = document.getElementById('editEmail').value.trim();
+            const login = document.getElementById('editLogin').value.trim();
+            const pass = document.getElementById('editPass').value.trim();
+            
+            if (!name || !login) return showToast('Имя и логин обязательны!', '⚠️');
+            if (email && !isValidEmail(email)) return showToast('Некорректный email!', '⚠️');
+            
+            currentUser.name = name;
+            currentUser.email = email;
+            currentUser.login = login;
+            if (pass) currentUser.password = pass;
+            
+            syncCurrentUser();
+            showToast('Профиль обновлен!', '✅');
+            document.querySelector('.modal-overlay').remove();
+            renderProfile();
+        };
+
+        // ==========================================
+        // АВТОРИЗАЦИЯ
+        // ==========================================
+        function showAuthWall() {
+            const root = document.getElementById('appRoot');
+            root.innerHTML = `
+                <div class="card text-center" style="margin-top: 2rem; padding: 3rem 1rem;">
+                    <div class="avatar-lg mb-1">🕵️</div>
+                    <h2>Добро пожаловать в Экибастуз</h2>
+                    <p class="text-muted mb-1">Чтобы брать квесты, делать покупки и получать уровни, нужно войти в систему.</p>
+                    <button class="btn btn-primary" onclick="showLoginModal()"><i class="fas fa-sign-in-alt"></i> Войти / Создать</button>
+                </div>
+            `;
+        }
+
+        window.showLoginModal = () => {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
+                <div class="modal-card">
+                    <h2 class="mb-1 text-center">Вход в систему</h2>
+                    <input type="text" id="authLogin" placeholder="Логин или Email">
+                    <input type="password" id="authPass" placeholder="Пароль">
+                    <button class="btn btn-primary mb-1" style="width:100%" id="authBtn">Войти</button>
+                    <div class="text-center text-muted" style="font-size:0.8rem">
+                        Для модератора: moderationforsitebeta67 / 12345676767aoao<br>
+                        Или введи новые данные для регистрации.
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            modal.querySelector('#authBtn').onclick = () => {
+                const l = modal.querySelector('#authLogin').value.trim();
+                const p = modal.querySelector('#authPass').value.trim();
+                if (!l || !p) return showToast('Заполни поля');
+
+                // Проверяем если это email
+                const isEmail = isValidEmail(l);
+
+                let user = allUsers.find(u => {
+                    if (isEmail) {
+                        return u.email === l && u.password === p;
+                    } else {
+                        return u.login === l && u.password === p;
+                    }
+                });
+
+                if (!user) {
+                    // Авто-рега
+                    if (isEmail && !isValidEmail(l)) {
+                        return showToast('Некорректный email!', '⚠️');
+                    }
+                    user = {
+                        id: 'u_' + Date.now(),
+                        name: l.split('@')[0],
+                        email: isEmail ? l : '',
+                        login: isEmail ? l.split('@')[0] : l,
+                        password: p,
+                        points: 50,
+                        xp: 0,
+                        level: 1,
+                        avatar: '👤',
+                        background: '',
+                        completedQuests: [],
+                        location: EKIBASTUZ_COORDS,
+                        role: 'user',
+                        inventory: [],
+                        activeBoosts: [],
+                        isOnline: true
+                    };
+                    allUsers.push(user);
+                    save('ekb_users', allUsers);
+                    showToast('Аккаунт создан!', '🎉');
+                } else {
+                    showToast('Успешный вход!', '🔓');
+                }
+
+                currentUser = user;
+                updateUserStats();
+                updateNavForRole();
+                modal.remove();
+
+                if (mapInstance) mapInstance.setView([EKIBASTUZ_COORDS.lat, EKIBASTUZ_COORDS.lng], 14);
+                renderCurrentPage();
+            };
+        };
+
+        window.logout = () => {
+            currentUser = null;
+            updateUserStats();
+            updateNavForRole();
+            currentPage = 'map';
+            updateNavUI();
+            renderCurrentPage();
+            showToast('Вы вышли', '👋');
+        };
+
+        // ==========================================
+        // НАВИГАЦИЯ И ЯДРО
+        // ==========================================
+        function updateNavForRole() {
+            const nav = document.getElementById('bottomNav');
+            const modBtn = nav.querySelector('[data-page="mod"]');
+
+            if (currentUser?.role === 'moderator') {
+                if (!modBtn) {
+                    const btn = document.createElement('button');
+                    btn.className = 'bottom-nav-btn';
+                    btn.dataset.page = 'mod';
+                    btn.innerHTML = '<i class="fas fa-shield-alt"></i><span>Управ.</span>';
+                    btn.onclick = () => navigateTo('mod');
+                    nav.appendChild(btn);
+                }
+            } else {
+                if (modBtn) modBtn.remove();
+            }
+        }
+
+        function updateNavUI() {
+            document.querySelectorAll('.bottom-nav-btn').forEach(btn => {
+                if (btn.dataset.page === currentPage) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+        }
+
+        function navigateTo(page) {
+            currentPage = page;
+            updateNavUI();
+            renderCurrentPage();
+        }
+
+        function renderCurrentPage() {
+            const root = document.getElementById('appRoot');
+            root.style.animation = 'none';
+            root.offsetHeight;
+            root.style.animation = 'fadeIn 0.3s ease';
+
+            if (currentPage === 'map') renderMap();
+            else if (currentPage === 'quests') renderQuests();
+            else if (currentPage === 'requests') renderRequests();
+            else if (currentPage === 'chat') renderChat();
+            else if (currentPage === 'shop') renderShop();
+            else if (currentPage === 'profile') renderProfile();
+            else if (currentPage === 'mod') renderMod();
+        }
+
+        // Биндинг кнопок меню
+        document.querySelectorAll('.bottom-nav-btn').forEach(btn => {
+            btn.addEventListener('click', () => navigateTo(btn.dataset.page));
+        });
+
+        // Запуск
+        window.onload = () => {
+            // Загрузка темы
+            const savedTheme = localStorage.getItem('ekb_theme') || 'dark';
+            document.body.setAttribute('data-theme', savedTheme);
+            document.getElementById('themeIcon').className = savedTheme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+
+            initData();
+            simulateOnlineUsers();
+            renderCurrentPage();
+
+            setTimeout(() => {
+                showToast('Добро пожаловать в Экибастуз!', '🏙️');
+            }, 1000);
+        };
+    </script>
+</body>
+
+</html>
