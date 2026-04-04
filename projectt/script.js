@@ -1,5 +1,4 @@
-// В самом начале, после переменных
-const IMG_PATH = 'texture/'; // или 'images/', или '/assets/'
+
 // ==========================================
 // ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
 // ==========================================
@@ -210,159 +209,159 @@ function initData() {
         save('ekb_donations', donations);
     } else donations = load('ekb_donations');
 
-    // Магазин
-    if (!localStorage.getItem('ekb_shop')) {
-        shopItems = [
-            { id: 's_av1', type: 'avatar', value: 'avv1.jfif', price: 300 },
-            { id: 's_av2', type: 'avatar', value: 'avv2.jfif', price: 250 },
-            { id: 's_av3', type: 'avatar', value: 'avv3.jfif', price: 400 },
-            { id: 's_bg1', name: 'Фон 1', type: 'background', value: 'fonn1.jfif', price: 800 },
+        // Магазин
+        if (!localStorage.getItem('ekb_shop')) {
+            shopItems = [
+                // Аватары
+                { id: 's_av1', type: 'avatar', src: 'texture/avv1.jfif', price: 300 },
+                { id: 's_av2', type: 'avatar', src: 'texture/avv2.jfif', price: 250 },
+                { id: 's_av3', type: 'avatar', src: 'texture/avv3.jfif', price: 400 },
+                { id: 's_av4', type: 'avatar', src: 'texture/avv4.jfif', price: 500 },
+                // Фоны
+                { id: 's_bg1', type: 'background', src: 'texture/fonn1.jfif', price: 800 },
+                { id: 's_bg2', type: 'background', src: 'texture/fonn2.jfif', price: 600 },
+                { id: 's_bg3', type: 'background', src: 'texture/fonn3.jfif', price: 1200 }
+            ];
+            save('ekb_shop', shopItems);
+        } else shopItems = load('ekb_shop');
 
-            { id: 's_bg1', name: 'фывфывфвф', type: 'background', value: 'texture/fonn1.jfif', price: 800 },
-            { id: 's_bg2', name: 'Зелёный оазис', type: 'background', value: 'texture/fonn2.jfif', price: 600 },
-            { id: 's_bg3', name: 'Горный закат', type: 'background', value: 'texture/fonn3.jfif', price: 1200 }
-        ];
-            
-        save('ekb_shop', shopItems);
-    } else shopItems = load('ekb_shop');
-
-    // Заявки
-    if (!localStorage.getItem('ekb_submissions')) {
-        submissions = [];
-        save('ekb_submissions', submissions);
-    } else submissions = load('ekb_submissions');
-}
-
-// Утилиты
-function save(key, data) { localStorage.setItem(key, JSON.stringify(data)); }
-function load(key) { return JSON.parse(localStorage.getItem(key)); }
-
-function showToast(msg, icon = '🔔') {
-    const div = document.createElement('div');
-    div.className = 'toast';
-    div.innerHTML = `<span>${icon}</span> ${msg}`;
-    document.body.appendChild(div);
-    setTimeout(() => div.remove(), 2800);
-}
-
-// ==========================================
-// ИГРОВАЯ ЛОГИКА
-// ==========================================
-function calcLevel(xp) { return Math.floor(1 + Math.sqrt(xp / 100)); }
-
-function getMultiplier(type) {
-    if (!currentUser || !currentUser.activeBoosts) return 1;
-    let mult = 1;
-    const now = Date.now();
-    currentUser.activeBoosts = currentUser.activeBoosts.filter(b => b.expires > now);
-    currentUser.activeBoosts.forEach(b => {
-        if (b.type.startsWith(type)) mult *= parseFloat(b.type.split('_')[1]);
-    });
-    return mult;
-}
-
-function addRewards(userId, xpBase, coinBase) {
-    const user = allUsers.find(u => u.id === userId);
-    if (!user) return;
-
-    const rewardFactor = 0.8;
-    let xpG = Math.floor(xpBase * rewardFactor);
-    let coinG = Math.floor(coinBase * rewardFactor);
-
-    if (currentUser && currentUser.id === userId) {
-        xpG = Math.floor(xpG * getMultiplier('xp'));
+        // Заявки
+        if (!localStorage.getItem('ekb_submissions')) {
+            submissions = [];
+            save('ekb_submissions', submissions);
+        } else submissions = load('ekb_submissions');
     }
 
-    user.xp = (user.xp || 0) + xpG;
-    user.points = (user.points || 0) + coinG;
+    // Утилиты
+    function save(key, data) { localStorage.setItem(key, JSON.stringify(data)); }
+    function load(key) { return JSON.parse(localStorage.getItem(key)); }
 
-    const newLvl = calcLevel(user.xp);
-    let lvlUp = false;
-    if (newLvl > user.level) { user.level = newLvl; lvlUp = true; }
-
-    if (currentUser && currentUser.id === userId) {
-        currentUser = { ...user };
-        showToast(`+${xpG} XP | +${coinG} 🪙`, '🎉');
-        if (lvlUp) setTimeout(() => showToast(`Уровень ${newLvl}!`, '🔥'), 1000);
+    function showToast(msg, icon = '🔔') {
+        const div = document.createElement('div');
+        div.className = 'toast';
+        div.innerHTML = `<span>${icon}</span> ${msg}`;
+        document.body.appendChild(div);
+        setTimeout(() => div.remove(), 2800);
     }
-    save('ekb_users', allUsers);
-}
 
-function donate(donationId, amount) {
-    if (!currentUser) return showToast('Сначала войдите', '❌');
-    if (currentUser.points < amount) return showToast('Недостаточно монет!', '💸');
+    // ==========================================
+    // ИГРОВАЯ ЛОГИКА
+    // ==========================================
+    function calcLevel(xp) { return Math.floor(1 + Math.sqrt(xp / 100)); }
 
-    const don = donations.find(d => d.id === donationId);
-    if (!don) return;
-
-    currentUser.points -= amount;
-    don.current += amount;
-
-    const dbU = allUsers.find(u => u.id === currentUser.id);
-    if (dbU) dbU.points = currentUser.points;
-    save('ekb_users', allUsers);
-    save('ekb_donations', donations);
-
-    showToast(`Пожертвовано ${amount}🪙`, '❤️');
-    renderCurrentPage();
-}
-
-// Симуляция онлайн-пользователей
-function simulateOnlineUsers() {
-    if (onlineInterval) clearInterval(onlineInterval);
-    onlineInterval = setInterval(() => {
-        let moved = false;
-        allUsers.forEach(u => {
-            if (u.id !== (currentUser?.id) && u.isOnline) {
-                u.location.lat += (Math.random() - 0.5) * 0.001;
-                u.location.lng += (Math.random() - 0.5) * 0.001;
-                moved = true;
-            }
+    function getMultiplier(type) {
+        if (!currentUser || !currentUser.activeBoosts) return 1;
+        let mult = 1;
+        const now = Date.now();
+        currentUser.activeBoosts = currentUser.activeBoosts.filter(b => b.expires > now);
+        currentUser.activeBoosts.forEach(b => {
+            if (b.type.startsWith(type)) mult *= parseFloat(b.type.split('_')[1]);
         });
-        if (moved && currentPage === 'map' && mapInstance) refreshMapMarkers();
-    }, 5000);
-}
+        return mult;
+    }
 
-// ==========================================
-// КАРТА
-// ==========================================
-function initMap(containerId) {
-    if (mapInstance) { mapInstance.remove(); mapInstance = null; }
-    const center = currentUser?.location || EKIBASTUZ_COORDS;
+    function addRewards(userId, xpBase, coinBase) {
+        const user = allUsers.find(u => u.id === userId);
+        if (!user) return;
 
-    mapInstance = L.map(containerId, { zoomControl: false }).setView([center.lat, center.lng], 14);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '© OpenStreetMap contributors © CARTO'
-    }).addTo(mapInstance);
+        const rewardFactor = 0.8;
+        let xpG = Math.floor(xpBase * rewardFactor);
+        let coinG = Math.floor(coinBase * rewardFactor);
 
-    L.control.zoom({ position: 'topright' }).addTo(mapInstance);
-    markersLayer = L.layerGroup().addTo(mapInstance);
+        if (currentUser && currentUser.id === userId) {
+            xpG = Math.floor(xpG * getMultiplier('xp'));
+        }
 
-    refreshMapMarkers();
-}
+        user.xp = (user.xp || 0) + xpG;
+        user.points = (user.points || 0) + coinG;
 
-function refreshMapMarkers() {
-    if (!markersLayer) return;
-    markersLayer.clearLayers();
+        const newLvl = calcLevel(user.xp);
+        let lvlUp = false;
+        if (newLvl > user.level) { user.level = newLvl; lvlUp = true; }
 
-    // Квесты
-    quests.filter(q => q.status === 'active').forEach(q => {
-        const markerType = q.isUrgent ? 'urgent' : 'normal';
-        const truncated = q.title.length > 20 ? q.title.slice(0, 20) + '…' : q.title;
-        const icon = L.divIcon({
-            html: `
+        if (currentUser && currentUser.id === userId) {
+            currentUser = { ...user };
+            showToast(`+${xpG} XP | +${coinG} 🪙`, '🎉');
+            if (lvlUp) setTimeout(() => showToast(`Уровень ${newLvl}!`, '🔥'), 1000);
+        }
+        save('ekb_users', allUsers);
+    }
+
+    function donate(donationId, amount) {
+        if (!currentUser) return showToast('Сначала войдите', '❌');
+        if (currentUser.points < amount) return showToast('Недостаточно монет!', '💸');
+
+        const don = donations.find(d => d.id === donationId);
+        if (!don) return;
+
+        currentUser.points -= amount;
+        don.current += amount;
+
+        const dbU = allUsers.find(u => u.id === currentUser.id);
+        if (dbU) dbU.points = currentUser.points;
+        save('ekb_users', allUsers);
+        save('ekb_donations', donations);
+
+        showToast(`Пожертвовано ${amount}🪙`, '❤️');
+        renderCurrentPage();
+    }
+
+    // Симуляция онлайн-пользователей
+    function simulateOnlineUsers() {
+        if (onlineInterval) clearInterval(onlineInterval);
+        onlineInterval = setInterval(() => {
+            let moved = false;
+            allUsers.forEach(u => {
+                if (u.id !== (currentUser?.id) && u.isOnline) {
+                    u.location.lat += (Math.random() - 0.5) * 0.001;
+                    u.location.lng += (Math.random() - 0.5) * 0.001;
+                    moved = true;
+                }
+            });
+            if (moved && currentPage === 'map' && mapInstance) refreshMapMarkers();
+        }, 5000);
+    }
+
+    // ==========================================
+    // КАРТА
+    // ==========================================
+    function initMap(containerId) {
+        if (mapInstance) { mapInstance.remove(); mapInstance = null; }
+        const center = currentUser?.location || EKIBASTUZ_COORDS;
+
+        mapInstance = L.map(containerId, { zoomControl: false }).setView([center.lat, center.lng], 14);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '© OpenStreetMap contributors © CARTO'
+        }).addTo(mapInstance);
+
+        L.control.zoom({ position: 'topright' }).addTo(mapInstance);
+        markersLayer = L.layerGroup().addTo(mapInstance);
+
+        refreshMapMarkers();
+    }
+
+    function refreshMapMarkers() {
+        if (!markersLayer) return;
+        markersLayer.clearLayers();
+
+        // Квесты
+        quests.filter(q => q.status === 'active').forEach(q => {
+            const markerType = q.isUrgent ? 'urgent' : 'normal';
+            const truncated = q.title.length > 20 ? q.title.slice(0, 20) + '…' : q.title;
+            const icon = L.divIcon({
+                html: `
                         <div class="quest-marker ${markerType}">
                             <i class="fas fa-${q.isUrgent ? 'star' : 'leaf'}"></i>
                             <div class="marker-name">${truncated}</div>
                         </div>
                     `,
-            className: '',
-            iconSize: [80, 72],
-            iconAnchor: [40, 72]
-        });
-        const marker = L.marker([q.lat, q.lng], { icon }).addTo(markersLayer);
+                className: '',
+                iconSize: [80, 72],
+                iconAnchor: [40, 72]
+            });
+            const marker = L.marker([q.lat, q.lng], { icon }).addTo(markersLayer);
 
-        marker.bindPopup(`
+            marker.bindPopup(`
                     <div style="min-width: 250px; background: #111827; color: var(--text); border-radius: 18px; padding: 15px;">
                         <h3 style="margin: 0 0 10px 0; color: var(--primary);">${q.title}</h3>
                         <p style="margin: 0 0 10px 0; font-size: 0.9rem;">${q.description}</p>
@@ -383,75 +382,75 @@ function refreshMapMarkers() {
                         </button>
                     </div>
                 `, { maxWidth: 300 });
-    });
+        });
 
-    // Пользователи - убраны, оставлена только стрелочка текущего игрока
+        // Пользователи - убраны, оставлена только стрелочка текущего игрока
 
-    // Текущий пользователь
-    if (currentUser) {
-        const myIcon = L.divIcon({
-            html: `
+        // Текущий пользователь
+        if (currentUser) {
+            const myIcon = L.divIcon({
+                html: `
                         <div class="current-user-arrow">
                             <i class="fas fa-location-arrow"></i>
                         </div>
                     `,
-            className: '',
-            iconSize: [30, 30],
-            iconAnchor: [15, 30]
-        });
-        L.marker([currentUser.location.lat, currentUser.location.lng], { icon: myIcon }).addTo(markersLayer);
+                className: '',
+                iconSize: [30, 30],
+                iconAnchor: [15, 30]
+            });
+            L.marker([currentUser.location.lat, currentUser.location.lng], { icon: myIcon }).addTo(markersLayer);
+        }
     }
-}
 
-window.startRouting = (lat, lng) => {
-    if (!currentUser) return showToast('Нужна авторизация', '❌');
-    if (routingControl) mapInstance.removeControl(routingControl);
+    window.startRouting = (lat, lng) => {
+        if (!currentUser) return showToast('Нужна авторизация', '❌');
+        if (routingControl) mapInstance.removeControl(routingControl);
 
-    routingControl = L.Routing.control({
-        waypoints: [
-            L.latLng(currentUser.location.lat, currentUser.location.lng),
-            L.latLng(lat, lng)
-        ],
-        routeWhileDragging: false,
-        addWaypoints: false,
-        fitSelectedRoutes: true,
-        lineOptions: { styles: [{ color: '#10b981', weight: 6, opacity: 0.8 }] },
-        show: false,
-        createMarker: () => null
-    }).addTo(mapInstance);
-    mapInstance.closePopup();
-}
+        routingControl = L.Routing.control({
+            waypoints: [
+                L.latLng(currentUser.location.lat, currentUser.location.lng),
+                L.latLng(lat, lng)
+            ],
+            routeWhileDragging: false,
+            addWaypoints: false,
+            fitSelectedRoutes: true,
+            lineOptions: { styles: [{ color: '#10b981', weight: 6, opacity: 0.8 }] },
+            show: false,
+            createMarker: () => null
+        }).addTo(mapInstance);
+        mapInstance.closePopup();
+    }
 
-function updateGeo() {
-    if (!navigator.geolocation) return showToast('Геолокация не поддерживается');
-    navigator.geolocation.getCurrentPosition(
-        p => {
-            if (currentUser) {
-                currentUser.location = { lat: p.coords.latitude, lng: p.coords.longitude };
-                const dbU = allUsers.find(u => u.id === currentUser.id);
-                if (dbU) dbU.location = currentUser.location;
-                save('ekb_users', allUsers);
-            }
-            if (mapInstance) {
-                mapInstance.setView([p.coords.latitude, p.coords.longitude], 15);
-                refreshMapMarkers();
-            }
-            showToast('Координаты обновлены', '📍');
-        },
-        () => showToast('Ошибка доступа к GPS', '⚠️')
-    );
-}
+    function updateGeo() {
+        if (!navigator.geolocation) return showToast('Геолокация не поддерживается');
+        navigator.geolocation.getCurrentPosition(
+            p => {
+                if (currentUser) {
+                    currentUser.location = { lat: p.coords.latitude, lng: p.coords.longitude };
+                    const dbU = allUsers.find(u => u.id === currentUser.id);
+                    if (dbU) dbU.location = currentUser.location;
+                    save('ekb_users', allUsers);
+                }
+                if (mapInstance) {
+                    mapInstance.setView([p.coords.latitude, p.coords.longitude], 15);
+                    refreshMapMarkers();
+                }
+                showToast('Координаты обновлены', '📍');
+            },
+            () => showToast('Ошибка доступа к GPS', '⚠️')
+        );
+    }
 
-// ==========================================
-// МИНИ-ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ
-// ==========================================
-window.showMiniProfile = (userId) => {
-    const user = allUsers.find(u => u.id === userId);
-    if (!user) return;
+    // ==========================================
+    // МИНИ-ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ
+    // ==========================================
+    window.showMiniProfile = (userId) => {
+        const user = allUsers.find(u => u.id === userId);
+        if (!user) return;
 
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    modal.innerHTML = `
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
                 <div class="mini-profile">
                     <div class="mini-profile-header">
                         <div class="mini-profile-avatar">
@@ -477,15 +476,15 @@ window.showMiniProfile = (userId) => {
                     </button>
                 </div>
             `;
-    document.body.appendChild(modal);
-}
+        document.body.appendChild(modal);
+    }
 
-// ==========================================
-// РЕНДЕР СТРАНИЦ
-// ==========================================
-function renderMap() {
-    const root = document.getElementById('appRoot');
-    root.innerHTML = `
+    // ==========================================
+    // РЕНДЕР СТРАНИЦ
+    // ==========================================
+    function renderMap() {
+        const root = document.getElementById('appRoot');
+        root.innerHTML = `
                 <div class="card" style="padding: 1rem;">
                     <div class="flex-between mb-1">
                         <h3><i class="fas fa-map-marked-alt text-primary"></i> Карта Экибастуза</h3>
@@ -494,7 +493,7 @@ function renderMap() {
                                 <i class="fas fa-crosshairs"></i>
                             </button>
                             ${currentUser ?
-            `<button class="btn btn-primary" style="padding: 8px 12px; margin-left: 8px;" 
+                `<button class="btn btn-primary" style="padding: 8px 12px; margin-left: 8px;" 
                                          onclick="createNewQuest()">
                                     <i class="fas fa-plus"></i> Создать квест
                                 </button>` : ''}
@@ -515,16 +514,16 @@ function renderMap() {
                 </div>
             `;
 
-    setTimeout(() => initMap('mainMap'), 100);
+        setTimeout(() => initMap('mainMap'), 100);
 
-    const urgent = quests.filter(q => q.status === 'active' && q.isUrgent);
-    const normal = quests.filter(q => q.status === 'active' && !q.isUrgent);
+        const urgent = quests.filter(q => q.status === 'active' && q.isUrgent);
+        const normal = quests.filter(q => q.status === 'active' && !q.isUrgent);
 
-    const uList = document.getElementById('urgentQuestsList');
-    if (urgent.length === 0) {
-        uList.innerHTML = '<p class="text-muted">Сейчас нет срочных заданий.</p>';
-    } else {
-        uList.innerHTML = urgent.map(q => `
+        const uList = document.getElementById('urgentQuestsList');
+        if (urgent.length === 0) {
+            uList.innerHTML = '<p class="text-muted">Сейчас нет срочных заданий.</p>';
+        } else {
+            uList.innerHTML = urgent.map(q => `
                     <div class="list-item urgent flex-between">
                         <div>
                             <h4 style="color: var(--danger); margin-bottom: 8px;">${q.title}</h4>
@@ -539,13 +538,13 @@ function renderMap() {
                         <button class="btn btn-danger" onclick="openQuestSubmit('${q.id}')">Взять</button>
                     </div>
                 `).join('');
-    }
+        }
 
-    const nList = document.getElementById('normalQuestsList');
-    if (normal.length === 0) {
-        nList.innerHTML = '<p class="text-muted">Сейчас нет обычных заданий.</p>';
-    } else {
-        nList.innerHTML = normal.map(q => `
+        const nList = document.getElementById('normalQuestsList');
+        if (normal.length === 0) {
+            nList.innerHTML = '<p class="text-muted">Сейчас нет обычных заданий.</p>';
+        } else {
+            nList.innerHTML = normal.map(q => `
                     <div class="list-item flex-between">
                         <div>
                             <h4 style="margin-bottom: 8px;">${q.title}</h4>
@@ -560,14 +559,14 @@ function renderMap() {
                         <button class="btn btn-secondary" onclick="openQuestSubmit('${q.id}')">Взять</button>
                     </div>
                 `).join('');
+        }
     }
-}
 
-function renderQuests() {
-    const root = document.getElementById('appRoot');
-    const activeQs = quests.filter(q => q.status === 'active');
+    function renderQuests() {
+        const root = document.getElementById('appRoot');
+        const activeQs = quests.filter(q => q.status === 'active');
 
-    root.innerHTML = `
+        root.innerHTML = `
                 <h2><i class="fas fa-clipboard-list"></i> Доступные квесты</h2>
                 <p class="text-muted mb-1">Выполняй задания и получай награды.</p>
                 <div id="questsContainer">
@@ -589,16 +588,16 @@ function renderQuests() {
                     `).join('')}
                 </div>
             `;
-}
+    }
 
-function renderDonations() {
-    const root = document.getElementById('appRoot');
-    root.innerHTML = `
+    function renderDonations() {
+        const root = document.getElementById('appRoot');
+        root.innerHTML = `
                 <h2><i class="fas fa-hands-helping"></i> Пожертвования</h2>
                 <p class="text-muted mb-1">Пожертвуй монеты на улучшение города.</p>
                 ${donations.map(d => {
-        const percent = Math.min(100, Math.floor((d.current / d.goal) * 100));
-        return `
+            const percent = Math.min(100, Math.floor((d.current / d.goal) * 100));
+            return `
                         <div class="card">
                             <div class="flex-between">
                                 <div style="font-size: 3rem;">${d.img}</div>
@@ -621,15 +620,15 @@ function renderDonations() {
                             </div>
                         </div>
                     `;
-    }).join('')}
+        }).join('')}
             `;
-}
+    }
 
-function renderShop() {
-    if (!currentUser) return showAuthWall();
+    function renderShop() {
+        if (!currentUser) return showAuthWall();
 
-    const root = document.getElementById('appRoot');
-    root.innerHTML = `
+        const root = document.getElementById('appRoot');
+        root.innerHTML = `
         <div class="flex-between mb-1">
             <h2><i class="fas fa-store"></i> Магазин</h2>
             <div style="display: flex; gap: 0.5rem; align-items: center;">
@@ -647,98 +646,98 @@ function renderShop() {
         
         <div class="shop-grid">
             ${(() => {
-            // Фильтруем по типу
-            let filteredItems = [];
-            if (currentShopTab === 'backgrounds') {
-                filteredItems = shopItems.filter(i => i.type === 'background');
-            } else {
-                filteredItems = shopItems.filter(i => i.type === 'avatar');
-            }
+                // Фильтруем по типу
+                let filteredItems = [];
+                if (currentShopTab === 'backgrounds') {
+                    filteredItems = shopItems.filter(i => i.type === 'background');
+                } else {
+                    filteredItems = shopItems.filter(i => i.type === 'avatar');
+                }
 
-            // ✅ СОРТИРОВКА ПО ЦЕНЕ (от дешёвых к дорогим)
-            filteredItems.sort((a, b) => a.price - b.price);
+                // ✅ СОРТИРОВКА ПО ЦЕНЕ (от дешёвых к дорогим)
+                filteredItems.sort((a, b) => a.price - b.price);
 
-            return filteredItems.map(item => {
-                const hasItem = currentUser.inventory.includes(item.id);
+                return filteredItems.map(item => {
+                    const hasItem = currentUser.inventory.includes(item.id);
 
-                // ✅ ИСПРАВЛЕНА ЗАГРУЗКА КАРТИНОК
-                if (item.type === 'background') {
-                    return `
+                    // ✅ ИСПРАВЛЕНА ЗАГРУЗКА КАРТИНОК
+                    if (item.type === 'background') {
+                        return `
                             <div class="shop-card">
                                 <div style="width: 100%; height: 120px; background-image: url('${item.value}'); background-size: cover; background-position: center; border-radius: 12px; margin-bottom: 0.75rem;"></div>
                                 <h4 style="font-size: 0.9rem;">${item.name || 'Фон'}</h4>
                                 ${hasItem ?
-                            `<button class="btn btn-outline" style="width: 100%;" onclick="equipItem('${item.id}')">✅ Экипировать</button>` :
-                            `<button class="btn btn-primary" style="width: 100%;" onclick="buyItem('${item.id}')">${item.price} 🪙</button>`
-                        }
+                                `<button class="btn btn-outline" style="width: 100%;" onclick="equipItem('${item.id}')">✅ Экипировать</button>` :
+                                `<button class="btn btn-primary" style="width: 100%;" onclick="buyItem('${item.id}')">${item.price} 🪙</button>`
+                            }
                             </div>
                         `;
-                } else {
-                    return `
+                    } else {
+                        return `
                             <div class="shop-card">
                                 <img src="${item.value}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 12px; margin: 0 auto 0.75rem; display: block;" 
                                      onerror="this.src='https://via.placeholder.com/80?text=Avatar'">
                                 <h4 style="font-size: 0.9rem;">${item.name || 'Аватар'}</h4>
                                 ${hasItem ?
-                            `<button class="btn btn-outline" style="width: 100%;" onclick="equipItem('${item.id}')">✅ Экипировать</button>` :
-                            `<button class="btn btn-primary" style="width: 100%;" onclick="buyItem('${item.id}')">${item.price} 🪙</button>`
-                        }
+                                `<button class="btn btn-outline" style="width: 100%;" onclick="equipItem('${item.id}')">✅ Экипировать</button>` :
+                                `<button class="btn btn-primary" style="width: 100%;" onclick="buyItem('${item.id}')">${item.price} 🪙</button>`
+                            }
                             </div>
                         `;
-                }
-            }).join('');
-        })()}
+                    }
+                }).join('');
+            })()}
         </div>
     `;
-}
+    }
 
-function renderProfile() {
-    if (!currentUser) return showAuthWall();
-    const root = document.getElementById('appRoot');
+    function renderProfile() {
+        if (!currentUser) return showAuthWall();
+        const root = document.getElementById('appRoot');
 
-    const xpForNext = Math.pow(currentUser.level, 2) * 100;
-    const xpCurrentLvl = Math.pow(currentUser.level - 1, 2) * 100;
-    const progress = Math.max(0, Math.min(100, ((currentUser.xp - xpCurrentLvl) / (xpForNext - xpCurrentLvl)) * 100));
+        const xpForNext = Math.pow(currentUser.level, 2) * 100;
+        const xpCurrentLvl = Math.pow(currentUser.level - 1, 2) * 100;
+        const progress = Math.max(0, Math.min(100, ((currentUser.xp - xpCurrentLvl) / (xpForNext - xpCurrentLvl)) * 100));
 
-    let boostHtml = '';
-    if (currentUser.activeBoosts && currentUser.activeBoosts.length > 0) {
-        boostHtml = `
+        let boostHtml = '';
+        if (currentUser.activeBoosts && currentUser.activeBoosts.length > 0) {
+            boostHtml = `
             <div class="card" style="border: 1px solid var(--accent);">
                 <h4><i class="fas fa-bolt" style="color: var(--accent);"></i> Активные бусты</h4>
                 ${currentUser.activeBoosts.map(b =>
-            `<div class="badge mt-1">${b.type.replace('_', ' x')} (до ${new Date(b.expires).toLocaleTimeString()})</div>`
-        ).join('')}
+                `<div class="badge mt-1">${b.type.replace('_', ' x')} (до ${new Date(b.expires).toLocaleTimeString()})</div>`
+            ).join('')}
             </div>
         `;
-    }
-
-    // ТВОИ СТАРЫЕ ССЫЛКИ
-    const LEVEL_REWARDS = {
-        5: { type: 'avatar', id: 'reward_av1', url: 'texture/av5.jfif', name: '' },
-        10: { type: 'avatar', id: 'reward_av2', url: 'texture/av10.jfif', name: '' },
-        15: { type: 'background', id: 'reward_bg1', url: 'texture/fon15.jfif', name: '' },
-        20: { type: 'avatar', id: 'reward_av3', url: 'texture/av20.jfif', name: '' },
-        25: { type: 'background', id: 'reward_bg2', url: 'texture/fon25.jfif', name: '' },
-        30: { type: 'avatar', id: 'reward_av4', url: 'texture/av30.jfif', name: '' },
-        35: { type: 'background', id: 'reward_bg3', url: 'texture/fon35.jfif', name: '' },
-        40: { type: 'avatar', id: 'reward_av5', url: 'texture/av40.jfif', name: '' },
-        45: { type: 'background', id: 'reward_bg4', url: 'texture/fon45.jfif', name: '' },
-        50: { type: 'avatar', id: 'reward_av6', url: 'texture/av50.jfif', name: '' }
-    };
-
-    const unlockedRewards = Object.entries(LEVEL_REWARDS).filter(([lvl]) => currentUser.level >= parseInt(lvl));
-
-    // ФОРМИРУЕМ СТИЛЬ ДЛЯ ФОНА
-    let bgStyle = '';
-    if (currentUser.background && currentUser.background !== '' && currentUser.background !== 'none') {
-        if (currentUser.background.startsWith('url(')) {
-            bgStyle = `background-image: ${currentUser.background};`;
-        } else {
-            bgStyle = `background-image: url(${currentUser.background});`;
         }
-    }
 
-    root.innerHTML = `
+        // ТВОИ СТАРЫЕ ССЫЛКИ
+        const LEVEL_REWARDS = {
+            5: { type: 'avatar', id: 'reward_av1', url: 'texture/av5.jfif', name: '' },
+            10: { type: 'avatar', id: 'reward_av2', url: 'texture/av10.jfif', name: '' },
+            15: { type: 'background', id: 'reward_bg1', url: 'texture/fon15.jfif', name: '' },
+            20: { type: 'avatar', id: 'reward_av3', url: 'texture/av20.jfif', name: '' },
+            25: { type: 'background', id: 'reward_bg2', url: 'texture/fon25.jfif', name: '' },
+            30: { type: 'avatar', id: 'reward_av4', url: 'texture/av30.jfif', name: '' },
+            35: { type: 'background', id: 'reward_bg3', url: 'texture/fon35.jfif', name: '' },
+            40: { type: 'avatar', id: 'reward_av5', url: 'texture/av40.jfif', name: '' },
+            45: { type: 'background', id: 'reward_bg4', url: 'texture/fon45.jfif', name: '' },
+            50: { type: 'avatar', id: 'reward_av6', url: 'texture/av50.jfif', name: '' }
+        };
+
+        const unlockedRewards = Object.entries(LEVEL_REWARDS).filter(([lvl]) => currentUser.level >= parseInt(lvl));
+
+        // ФОРМИРУЕМ СТИЛЬ ДЛЯ ФОНА
+        let bgStyle = '';
+        if (currentUser.background && currentUser.background !== '' && currentUser.background !== 'none') {
+            if (currentUser.background.startsWith('url(')) {
+                bgStyle = `background-image: ${currentUser.background};`;
+            } else {
+                bgStyle = `background-image: url(${currentUser.background});`;
+            }
+        }
+
+        root.innerHTML = `
         <div class="profile-header" style="${bgStyle}">
             <div class="profile-content">
                 <div class="avatar-lg" style="${currentUser.frame || ''}">
@@ -789,9 +788,9 @@ function renderProfile() {
                     <p class="text-muted mb-1">Каждые 5 уровней вы получаете специальную награду!</p>
                     <div class="grid-2">
                         ${Object.entries(LEVEL_REWARDS).map(([level, reward]) => {
-        const isUnlocked = currentUser.level >= parseInt(level);
-        const isCurrent = currentUser.level == level;
-        return `
+            const isUnlocked = currentUser.level >= parseInt(level);
+            const isCurrent = currentUser.level == level;
+            return `
                                 <div class="level-reward-item ${isCurrent ? 'current' : ''} ${isUnlocked ? 'unlocked' : 'locked'}">
                                     <div class="flex-between">
                                         <span class="text-primary">Уровень ${level}</span>
@@ -799,14 +798,14 @@ function renderProfile() {
                                     </div>
                                     <div class="mt-1">
                                         ${reward.type === 'avatar' ?
-                `<img src="${reward.url}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">` :
-                `<div style="width: 40px; height: 40px; background-image: url(${reward.url}); background-size: cover; border-radius: 8px;"></div>`
-            }
+                    `<img src="${reward.url}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">` :
+                    `<div style="width: 40px; height: 40px; background-image: url(${reward.url}); background-size: cover; border-radius: 8px;"></div>`
+                }
                                         <span class="text-muted" style="font-size: 0.8rem;">${reward.name}</span>
                                     </div>
                                 </div>
                             `;
-    }).join('')}
+        }).join('')}
                     </div>
                 </div>
             </div>
@@ -838,29 +837,29 @@ function renderProfile() {
         </button>
     `;
 
-    window.showProfileTab = (tab) => {
-        const contents = document.querySelectorAll('#profileContent .tab-content');
-        const buttons = document.querySelectorAll('.tabs .tab-btn');
+        window.showProfileTab = (tab) => {
+            const contents = document.querySelectorAll('#profileContent .tab-content');
+            const buttons = document.querySelectorAll('.tabs .tab-btn');
 
-        contents.forEach(c => c.style.display = 'none');
-        buttons.forEach(b => b.classList.remove('active'));
+            contents.forEach(c => c.style.display = 'none');
+            buttons.forEach(b => b.classList.remove('active'));
 
-        document.getElementById(`${tab}Tab`).style.display = 'block';
-        event.target.classList.add('active');
-    };
+            document.getElementById(`${tab}Tab`).style.display = 'block';
+            event.target.classList.add('active');
+        };
 
-    window.showProfileEditor = () => {
-        const modal = document.createElement('div');
-        modal.className = 'modal-overlay';
+        window.showProfileEditor = () => {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
 
-        const boughtItems = currentUser.inventory.map(id => shopItems.find(i => i.id === id)).filter(i => i);
-        const boughtAvatars = boughtItems.filter(i => i.type === 'avatar');
-        const boughtBackgrounds = boughtItems.filter(i => i.type === 'background');
+            const boughtItems = currentUser.inventory.map(id => shopItems.find(i => i.id === id)).filter(i => i);
+            const boughtAvatars = boughtItems.filter(i => i.type === 'avatar');
+            const boughtBackgrounds = boughtItems.filter(i => i.type === 'background');
 
-        const allAvatars = [...boughtAvatars, ...unlockedRewards.filter(r => r[1].type === 'avatar').map(([_, r]) => ({ id: r.id, name: r.name, type: 'avatar', value: r.url }))];
-        const allBackgrounds = [...boughtBackgrounds, ...unlockedRewards.filter(r => r[1].type === 'background').map(([_, r]) => ({ id: r.id, name: r.name, type: 'background', value: r.url }))];
+            const allAvatars = [...boughtAvatars, ...unlockedRewards.filter(r => r[1].type === 'avatar').map(([_, r]) => ({ id: r.id, name: r.name, type: 'avatar', value: r.url }))];
+            const allBackgrounds = [...boughtBackgrounds, ...unlockedRewards.filter(r => r[1].type === 'background').map(([_, r]) => ({ id: r.id, name: r.name, type: 'background', value: r.url }))];
 
-        modal.innerHTML = `
+            modal.innerHTML = `
             <div class="modal-card" style="max-width: 500px;">
                 <h3 class="mb-1">Настройка профиля</h3>
                 
@@ -889,32 +888,32 @@ function renderProfile() {
                 <button class="btn btn-outline" style="width: 100%; margin-top: 1rem;" onclick="this.closest('.modal-overlay').remove()">Закрыть</button>
             </div>
         `;
-        document.body.appendChild(modal);
-    };
+            document.body.appendChild(modal);
+        };
 
-    window.equipProfileItem = (type, itemId, itemUrl) => {
-        if (type === 'avatar') {
-            currentUser.avatar = itemUrl;
-        } else if (type === 'background') {
-            currentUser.background = itemUrl;
-        }
+        window.equipProfileItem = (type, itemId, itemUrl) => {
+            if (type === 'avatar') {
+                currentUser.avatar = itemUrl;
+            } else if (type === 'background') {
+                currentUser.background = itemUrl;
+            }
 
-        const dbU = allUsers.find(u => u.id === currentUser.id);
-        if (dbU) {
-            dbU[type] = itemUrl;
-        }
-        save('ekb_users', allUsers);
+            const dbU = allUsers.find(u => u.id === currentUser.id);
+            if (dbU) {
+                dbU[type] = itemUrl;
+            }
+            save('ekb_users', allUsers);
 
-        renderProfile();
-        showToast('Профиль обновлён!', '✨');
-    };
+            renderProfile();
+            showToast('Профиль обновлён!', '✨');
+        };
 
-    window.showWithdrawModal = () => {
-        if (currentUser.points < 100) return showToast('Минимум 100 монет для вывода', '❌');
+        window.showWithdrawModal = () => {
+            if (currentUser.points < 100) return showToast('Минимум 100 монет для вывода', '❌');
 
-        const modal = document.createElement('div');
-        modal.className = 'modal-overlay';
-        modal.innerHTML = `
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
             <div class="modal-card">
                 <h3 class="mb-1">Вывод средств</h3>
                 <p class="text-muted mb-1">Вывод ${currentUser.points} монет = ${(currentUser.points * 10).toLocaleString()} ₸</p>
@@ -925,42 +924,42 @@ function renderProfile() {
                 </div>
             </div>
         `;
-        document.body.appendChild(modal);
+            document.body.appendChild(modal);
 
-        modal.querySelector('#confirmWithdrawBtn').onclick = () => {
-            const card = modal.querySelector('#cardNumber').value.trim();
-            if (!card || card.length < 16) return showToast('Введите корректный номер карты', '❌');
+            modal.querySelector('#confirmWithdrawBtn').onclick = () => {
+                const card = modal.querySelector('#cardNumber').value.trim();
+                if (!card || card.length < 16) return showToast('Введите корректный номер карты', '❌');
 
-            const amount = currentUser.points;
-            currentUser.points = 0;
-            const dbU = allUsers.find(u => u.id === currentUser.id);
-            if (dbU) dbU.points = 0;
-            save('ekb_users', allUsers);
+                const amount = currentUser.points;
+                currentUser.points = 0;
+                const dbU = allUsers.find(u => u.id === currentUser.id);
+                if (dbU) dbU.points = 0;
+                save('ekb_users', allUsers);
 
-            showToast(`Вывод ${amount * 10}₸ выполнен!`, '💰');
-            modal.remove();
-            renderProfile();
+                showToast(`Вывод ${amount * 10}₸ выполнен!`, '💰');
+                modal.remove();
+                renderProfile();
+            };
         };
-    };
-}
+    }
 
-function renderMod() {
-    if (!currentUser || currentUser.role !== 'moderator') return;
-    const root = document.getElementById('appRoot');
+    function renderMod() {
+        if (!currentUser || currentUser.role !== 'moderator') return;
+        const root = document.getElementById('appRoot');
 
-    const pendingSubs = submissions.filter(s => s.status === 'pending');
-    const pendingQuests = quests.filter(q => q.status === 'pending');
+        const pendingSubs = submissions.filter(s => s.status === 'pending');
+        const pendingQuests = quests.filter(q => q.status === 'pending');
 
-    root.innerHTML = `
+        root.innerHTML = `
                 <h2><i class="fas fa-shield-alt"></i> Панель Модератора</h2>
                 
                 <div class="card">
                     <h3>📋 Заявки на выполнение (${pendingSubs.length})</h3>
                     ${pendingSubs.length === 0 ?
-            '<p class="text-muted">Нет заявок на проверку.</p>' :
-            pendingSubs.map(sub => {
-                const q = quests.find(x => x.id === sub.questId);
-                return `
+                '<p class="text-muted">Нет заявок на проверку.</p>' :
+                pendingSubs.map(sub => {
+                    const q = quests.find(x => x.id === sub.questId);
+                    return `
                                 <div class="list-item" style="margin-top: 1rem;">
                                     <div class="flex-between mb-1">
                                         <b>👤 ${sub.userName}</b>
@@ -978,15 +977,15 @@ function renderMod() {
                                     </div>
                                 </div>
                             `;
-            }).join('')
-        }
+                }).join('')
+            }
                 </div>
 
                 <div class="card">
                     <h3>🆕 Новые квесты на модерацию (${pendingQuests.length})</h3>
                     ${pendingQuests.length === 0 ?
-            '<p class="text-muted">Нет новых квестов.</p>' :
-            pendingQuests.map(q => `
+                '<p class="text-muted">Нет новых квестов.</p>' :
+                pendingQuests.map(q => `
                             <div class="list-item" style="margin-top: 1rem;">
                                 <h4>${q.title}</h4>
                                 <p class="text-muted">${q.description}</p>
@@ -1007,53 +1006,53 @@ function renderMod() {
                                 </div>
                             </div>
                         `).join('')
-        }
+            }
                 </div>
             `;
-}
-
-// ==========================================
-// ЛОГИКА ДЕЙСТВИЙ
-// ==========================================
-function buyItem(id) {
-    const item = shopItems.find(i => i.id === id);
-    if (!item) return;
-    if (currentUser.points < item.price) return showToast('Недостаточно монет!', '💸');
-
-    currentUser.points -= item.price;
-
-    if (item.type === 'boost') {
-        if (!currentUser.activeBoosts) currentUser.activeBoosts = [];
-        currentUser.activeBoosts.push({ type: item.value, expires: Date.now() + 86400000 });
-        showToast(`Буст ${item.name} активирован!`, '⚡');
-    } else {
-        if (currentUser.inventory.includes(id)) return showToast('Уже куплено', '⚠️');
-        currentUser.inventory.push(id);
-        equipItem(id);
-        showToast('Покупка успешна!', '🛍️');
     }
 
-    syncCurrentUser();
-    renderShop();
-}
+    // ==========================================
+    // ЛОГИКА ДЕЙСТВИЙ
+    // ==========================================
+    function buyItem(id) {
+        const item = shopItems.find(i => i.id === id);
+        if (!item) return;
+        if (currentUser.points < item.price) return showToast('Недостаточно монет!', '💸');
 
-function equipItem(id) {
-    const item = shopItems.find(i => i.id === id);
-    if (!item) return;
-    if (item.type === 'avatar') currentUser.avatar = item.value;
-    if (item.type === 'background') currentUser.background = item.value;
-    if (item.type === 'frame') currentUser.frame = item.value;
-    syncCurrentUser();
-    renderShop();
-    if (mapInstance) refreshMapMarkers();
-    showToast('Экипировано', '✨');
-}
+        currentUser.points -= item.price;
 
-function showBuyCoinsModal() {
-    if (!currentUser) return showToast('Сначала войдите', '❌');
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    modal.innerHTML = `
+        if (item.type === 'boost') {
+            if (!currentUser.activeBoosts) currentUser.activeBoosts = [];
+            currentUser.activeBoosts.push({ type: item.value, expires: Date.now() + 86400000 });
+            showToast(`Буст ${item.name} активирован!`, '⚡');
+        } else {
+            if (currentUser.inventory.includes(id)) return showToast('Уже куплено', '⚠️');
+            currentUser.inventory.push(id);
+            equipItem(id);
+            showToast('Покупка успешна!', '🛍️');
+        }
+
+        syncCurrentUser();
+        renderShop();
+    }
+
+    function equipItem(id) {
+        const item = shopItems.find(i => i.id === id);
+        if (!item) return;
+        if (item.type === 'avatar') currentUser.avatar = item.value;
+        if (item.type === 'background') currentUser.background = item.value;
+        if (item.type === 'frame') currentUser.frame = item.value;
+        syncCurrentUser();
+        renderShop();
+        if (mapInstance) refreshMapMarkers();
+        showToast('Экипировано', '✨');
+    }
+
+    function showBuyCoinsModal() {
+        if (!currentUser) return showToast('Сначала войдите', '❌');
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
                 <div class="modal-card">
                     <h3 class="mb-1">Пополнить монеты</h3>
                     <p class="text-muted mb-1">Выберите пакет монет.</p>
@@ -1069,41 +1068,41 @@ function showBuyCoinsModal() {
                     </div>
                 </div>
             `;
-    document.body.appendChild(modal);
+        document.body.appendChild(modal);
 
-    modal.querySelector('#confirmBuyBtn').onclick = () => {
-        const card = modal.querySelector('#cardNumber').value.trim();
-        if (!card) return showToast('Введите номер карты', '⚠️');
-        // Имитация, не сохраняем данные
-        showToast('Покупка имитирована, монеты добавлены', '💰');
-        document.querySelector('.modal-overlay').remove();
-    };
-}
-
-function buyCoins(amount, price) {
-    if (!currentUser) return;
-    currentUser.points += amount;
-    syncCurrentUser();
-    showToast(`Получено ${amount} 🪙`, '💰');
-    document.querySelector('.modal-overlay').remove();
-    renderCurrentPage();
-}
-
-function syncCurrentUser() {
-    const dbU = allUsers.find(u => u.id === currentUser.id);
-    if (dbU) {
-        Object.assign(dbU, currentUser);
-        save('ekb_users', allUsers);
+        modal.querySelector('#confirmBuyBtn').onclick = () => {
+            const card = modal.querySelector('#cardNumber').value.trim();
+            if (!card) return showToast('Введите номер карты', '⚠️');
+            // Имитация, не сохраняем данные
+            showToast('Покупка имитирована, монеты добавлены', '💰');
+            document.querySelector('.modal-overlay').remove();
+        };
     }
-}
 
-window.openQuestSubmit = (qId) => {
-    if (!currentUser) return showToast('Сначала войдите', '❌');
-    const q = quests.find(x => x.id === qId);
+    function buyCoins(amount, price) {
+        if (!currentUser) return;
+        currentUser.points += amount;
+        syncCurrentUser();
+        showToast(`Получено ${amount} 🪙`, '💰');
+        document.querySelector('.modal-overlay').remove();
+        renderCurrentPage();
+    }
 
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    modal.innerHTML = `
+    function syncCurrentUser() {
+        const dbU = allUsers.find(u => u.id === currentUser.id);
+        if (dbU) {
+            Object.assign(dbU, currentUser);
+            save('ekb_users', allUsers);
+        }
+    }
+
+    window.openQuestSubmit = (qId) => {
+        if (!currentUser) return showToast('Сначала войдите', '❌');
+        const q = quests.find(x => x.id === qId);
+
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
                 <div class="modal-card">
                     <h3 class="mb-1">${q.title}</h3>
                     <p class="text-muted mb-1">Опиши выполнение задания</p>
@@ -1122,111 +1121,111 @@ window.openQuestSubmit = (qId) => {
                     </div>
                 </div>
             `;
-    document.body.appendChild(modal);
+        document.body.appendChild(modal);
 
-    const photoInput = modal.querySelector('#subPhoto');
-    const photoLabel = modal.querySelector('#subPhotoLabel');
-    const photoPreview = modal.querySelector('#subPhotoPreview');
+        const photoInput = modal.querySelector('#subPhoto');
+        const photoLabel = modal.querySelector('#subPhotoLabel');
+        const photoPreview = modal.querySelector('#subPhotoPreview');
 
-    photoInput.addEventListener('change', () => {
-        const file = photoInput.files[0];
-        if (!file) {
-            photoLabel.textContent = 'Фото не выбрано';
-            photoPreview.style.display = 'none';
-            photoPreview.innerHTML = '';
-            return;
-        }
-        photoLabel.textContent = file.name;
-        const reader = new FileReader();
-        reader.onload = () => {
-            photoPreview.style.display = 'block';
-            photoPreview.innerHTML = `<img src="${reader.result}" alt="Фото" style="width:100%; border-radius: 12px; max-height: 120px; object-fit: cover;">`;
-        };
-        reader.readAsDataURL(file);
-    });
-
-    modal.querySelector('#sendSubBtn').onclick = () => {
-        const comment = modal.querySelector('#subComment').value.trim();
-        if (!comment) return showToast('Добавь описание!', '⚠️');
-
-        const file = photoInput.files[0];
-        const sendSubmission = (photoData) => {
-            submissions.push({
-                id: 'sub_' + Date.now(),
-                questId: qId,
-                userId: currentUser.id,
-                userName: currentUser.name,
-                comment,
-                photo: photoData || '',
-                status: 'pending',
-                time: Date.now()
-            });
-            save('ekb_submissions', submissions);
-            showToast('Отправлено на проверку', '✅');
-            modal.remove();
-        };
-
-        if (file) {
+        photoInput.addEventListener('change', () => {
+            const file = photoInput.files[0];
+            if (!file) {
+                photoLabel.textContent = 'Фото не выбрано';
+                photoPreview.style.display = 'none';
+                photoPreview.innerHTML = '';
+                return;
+            }
+            photoLabel.textContent = file.name;
             const reader = new FileReader();
-            reader.onload = () => sendSubmission(reader.result);
+            reader.onload = () => {
+                photoPreview.style.display = 'block';
+                photoPreview.innerHTML = `<img src="${reader.result}" alt="Фото" style="width:100%; border-radius: 12px; max-height: 120px; object-fit: cover;">`;
+            };
             reader.readAsDataURL(file);
-        } else {
-            sendSubmission('');
+        });
+
+        modal.querySelector('#sendSubBtn').onclick = () => {
+            const comment = modal.querySelector('#subComment').value.trim();
+            if (!comment) return showToast('Добавь описание!', '⚠️');
+
+            const file = photoInput.files[0];
+            const sendSubmission = (photoData) => {
+                submissions.push({
+                    id: 'sub_' + Date.now(),
+                    questId: qId,
+                    userId: currentUser.id,
+                    userName: currentUser.name,
+                    comment,
+                    photo: photoData || '',
+                    status: 'pending',
+                    time: Date.now()
+                });
+                save('ekb_submissions', submissions);
+                showToast('Отправлено на проверку', '✅');
+                modal.remove();
+            };
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = () => sendSubmission(reader.result);
+                reader.readAsDataURL(file);
+            } else {
+                sendSubmission('');
+            }
+        };
+    }
+
+    window.resolveSub = (subId, isApproved) => {
+        const sub = submissions.find(s => s.id === subId);
+        if (!sub) return;
+
+        sub.status = isApproved ? 'approved' : 'rejected';
+        save('ekb_submissions', submissions);
+
+        if (isApproved) {
+            const q = quests.find(x => x.id === sub.questId);
+            if (q) {
+                addRewards(sub.userId, q.xpReward, q.coinReward);
+                const u = allUsers.find(user => user.id === sub.userId);
+                if (u) {
+                    if (!u.completedQuests) u.completedQuests = [];
+                    u.completedQuests.push(q.id);
+                    save('ekb_users', allUsers);
+                }
+
+                // Удаляем квест после одобрения
+                const questIndex = quests.findIndex(x => x.id === sub.questId);
+                if (questIndex !== -1) {
+                    quests.splice(questIndex, 1);
+                    save('ekb_quests', quests);
+                    showToast('Квест выполнен и удалён с карты!', '🗑️');
+                }
+
+                // Обновляем карту если она открыта
+                if (currentPage === 'map' && mapInstance) {
+                    refreshMapMarkers();
+                }
+            }
+        }
+        showToast(isApproved ? 'Одобрено' : 'Отклонено');
+        renderMod();
+
+        // Если модератор одобрил и мы на странице карты - обновляем
+        if (currentPage === 'map') {
+            renderMap();
         }
     };
-}
 
-window.resolveSub = (subId, isApproved) => {
-    const sub = submissions.find(s => s.id === subId);
-    if (!sub) return;
-
-    sub.status = isApproved ? 'approved' : 'rejected';
-    save('ekb_submissions', submissions);
-
-    if (isApproved) {
-        const q = quests.find(x => x.id === sub.questId);
-        if (q) {
-            addRewards(sub.userId, q.xpReward, q.coinReward);
-            const u = allUsers.find(user => user.id === sub.userId);
-            if (u) {
-                if (!u.completedQuests) u.completedQuests = [];
-                u.completedQuests.push(q.id);
-                save('ekb_users', allUsers);
-            }
-
-            // Удаляем квест после одобрения
-            const questIndex = quests.findIndex(x => x.id === sub.questId);
-            if (questIndex !== -1) {
-                quests.splice(questIndex, 1);
-                save('ekb_quests', quests);
-                showToast('Квест выполнен и удалён с карты!', '🗑️');
-            }
-
-            // Обновляем карту если она открыта
-            if (currentPage === 'map' && mapInstance) {
-                refreshMapMarkers();
-            }
+    window.createNewQuest = () => {
+        newQuestLocation = null;
+        if (newQuestTempMarker) {
+            if (markersLayer) markersLayer.removeLayer(newQuestTempMarker);
+            newQuestTempMarker = null;
         }
-    }
-    showToast(isApproved ? 'Одобрено' : 'Отклонено');
-    renderMod();
 
-    // Если модератор одобрил и мы на странице карты - обновляем
-    if (currentPage === 'map') {
-        renderMap();
-    }
-};
-
-window.createNewQuest = () => {
-    newQuestLocation = null;
-    if (newQuestTempMarker) {
-        if (markersLayer) markersLayer.removeLayer(newQuestTempMarker);
-        newQuestTempMarker = null;
-    }
-
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    modal.innerHTML = `
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
                 <div class="modal-card" style="max-width: 600px;">
                     <h3 class="mb-1">Создать новый квест</h3>
                     <input type="text" id="questTitle" maxlength="50" placeholder="Название квеста (до 50 символов)">
@@ -1239,8 +1238,8 @@ window.createNewQuest = () => {
                     <select id="questAddress">
                         <option value="">Выберите адрес</option>
                         ${EKIBASTUZ_ADDRESSES.map(addr =>
-        `<option value="${addr.name}|${addr.lat}|${addr.lng}">${addr.name}</option>`
-    ).join('')}
+            `<option value="${addr.name}|${addr.lat}|${addr.lng}">${addr.name}</option>`
+        ).join('')}
                     </select>
                     <div class="grid-2">
                         <input type="number" id="questCoins" placeholder="Награда монет" value="50">
@@ -1255,144 +1254,144 @@ window.createNewQuest = () => {
                     </div>
                 </div>
             `;
-    document.body.appendChild(modal);
+        document.body.appendChild(modal);
 
-    const questImageInput = modal.querySelector('#questImage');
-    const questImagePreview = modal.querySelector('#questImagePreview');
+        const questImageInput = modal.querySelector('#questImage');
+        const questImagePreview = modal.querySelector('#questImagePreview');
 
-    questImageInput.addEventListener('change', () => {
-        const file = questImageInput.files[0];
-        if (!file) {
-            questImagePreview.style.display = 'none';
-            questImagePreview.innerHTML = '';
-            return;
-        }
-        const reader = new FileReader();
-        reader.onload = () => {
-            questImagePreview.style.display = 'block';
-            questImagePreview.innerHTML = `<img src="${reader.result}" alt="Фото квеста" style="width:100%; border-radius: 12px; max-height: 120px; object-fit: cover;">`;
-        };
-        reader.readAsDataURL(file);
-    });
-
-    let questMap = null;
-    let questMarkersLayer = null;
-
-    modal.querySelector('#pickQuestLocationBtn').onclick = () => {
-        const mapContainer = modal.querySelector('#questMapContainer');
-        if (mapContainer.style.display === 'none') {
-            mapContainer.style.display = 'block';
-            questMap = L.map('questMapContainer').setView(EKIBASTUZ_COORDS, 13);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors'
-            }).addTo(questMap);
-            questMarkersLayer = L.layerGroup().addTo(questMap);
-            showToast('Кликните на карту, чтобы выбрать место', '📍');
-            questMap.on('click', event => {
-                newQuestLocation = event.latlng;
-                if (newQuestTempMarker) questMarkersLayer.removeLayer(newQuestTempMarker);
-                newQuestTempMarker = L.marker(event.latlng, {
-                    icon: L.divIcon({
-                        html: '<div class="quest-marker normal"></div>',
-                        className: '',
-                        iconSize: [42, 42],
-                        iconAnchor: [21, 42]
-                    })
-                }).addTo(questMarkersLayer);
-                modal.querySelector('#selectedLocationInfo').textContent = `Выбрано место: ${event.latlng.lat.toFixed(5)}, ${event.latlng.lng.toFixed(5)}`;
-                mapContainer.style.display = 'none';
-                questMap.remove();
-                questMap = null;
-            });
-        } else {
-            mapContainer.style.display = 'none';
-            if (questMap) questMap.remove();
-            questMap = null;
-        }
-    };
-};
-
-window.saveNewQuest = () => {
-    const title = document.getElementById('questTitle').value.trim();
-    const desc = document.getElementById('questDesc').value.trim();
-    const addressData = document.getElementById('questAddress').value;
-    const imageFile = document.getElementById('questImage').files[0];
-
-    if (!title || !desc || (!addressData && !newQuestLocation)) {
-        showToast('Заполните название, описание и место', '⚠️');
-        return;
-    }
-
-    const finalTitle = title.slice(0, 50);
-    const finalDesc = desc.slice(0, 220);
-
-    // ФИКСИРОВАННАЯ НАГРАДА (только модератор сможет менять потом)
-    const xp = 100;
-    const coins = 50;
-    const isUrgent = document.getElementById('questUrgent').checked;
-
-    // Полная стоимость создания квеста
-    const cost = 200; // Фиксированная цена за создание квеста
-
-    if (currentUser.points < cost) {
-        showToast(`Недостаточно монет для создания квеста — ${cost} 🪙`, '💸');
-        return;
-    }
-
-    const createQuest = (imageData) => {
-        let lat, lng, address;
-        if (newQuestLocation) {
-            lat = newQuestLocation.lat;
-            lng = newQuestLocation.lng;
-            address = 'Метка на карте';
-        } else {
-            [address, lat, lng] = addressData.split('|');
-            lat = parseFloat(lat);
-            lng = parseFloat(lng);
-        }
-
-        // СПИСЫВАЕМ ПОЛНУЮ СТОИМОСТЬ
-        currentUser.points -= cost;
-        syncCurrentUser();
-
-        quests.push({
-            id: 'q_' + Date.now(),
-            title: finalTitle,
-            description: finalDesc,
-            xpReward: xp,
-            coinReward: coins,
-            lat,
-            lng,
-            address,
-            creatorId: currentUser.id,
-            status: 'pending', // На модерацию
-            isUrgent,
-            image: imageData || ''
+        questImageInput.addEventListener('change', () => {
+            const file = questImageInput.files[0];
+            if (!file) {
+                questImagePreview.style.display = 'none';
+                questImagePreview.innerHTML = '';
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = () => {
+                questImagePreview.style.display = 'block';
+                questImagePreview.innerHTML = `<img src="${reader.result}" alt="Фото квеста" style="width:100%; border-radius: 12px; max-height: 120px; object-fit: cover;">`;
+            };
+            reader.readAsDataURL(file);
         });
 
-        save('ekb_quests', quests);
-        showToast(`Квест создан за ${cost} 🪙 и отправлен на модерацию`, '✅');
-        document.querySelector('.modal-overlay').remove();
-        renderMap();
+        let questMap = null;
+        let questMarkersLayer = null;
+
+        modal.querySelector('#pickQuestLocationBtn').onclick = () => {
+            const mapContainer = modal.querySelector('#questMapContainer');
+            if (mapContainer.style.display === 'none') {
+                mapContainer.style.display = 'block';
+                questMap = L.map('questMapContainer').setView(EKIBASTUZ_COORDS, 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(questMap);
+                questMarkersLayer = L.layerGroup().addTo(questMap);
+                showToast('Кликните на карту, чтобы выбрать место', '📍');
+                questMap.on('click', event => {
+                    newQuestLocation = event.latlng;
+                    if (newQuestTempMarker) questMarkersLayer.removeLayer(newQuestTempMarker);
+                    newQuestTempMarker = L.marker(event.latlng, {
+                        icon: L.divIcon({
+                            html: '<div class="quest-marker normal"></div>',
+                            className: '',
+                            iconSize: [42, 42],
+                            iconAnchor: [21, 42]
+                        })
+                    }).addTo(questMarkersLayer);
+                    modal.querySelector('#selectedLocationInfo').textContent = `Выбрано место: ${event.latlng.lat.toFixed(5)}, ${event.latlng.lng.toFixed(5)}`;
+                    mapContainer.style.display = 'none';
+                    questMap.remove();
+                    questMap = null;
+                });
+            } else {
+                mapContainer.style.display = 'none';
+                if (questMap) questMap.remove();
+                questMap = null;
+            }
+        };
     };
 
-    if (imageFile) {
-        const reader = new FileReader();
-        reader.onload = () => createQuest(reader.result);
-        reader.readAsDataURL(imageFile);
-    } else {
-        createQuest('');
-    }
-};
+    window.saveNewQuest = () => {
+        const title = document.getElementById('questTitle').value.trim();
+        const desc = document.getElementById('questDesc').value.trim();
+        const addressData = document.getElementById('questAddress').value;
+        const imageFile = document.getElementById('questImage').files[0];
 
-window.approveQuest = (questId) => {
-    const quest = quests.find(q => q.id === questId);
-    if (!quest) return;
+        if (!title || !desc || (!addressData && !newQuestLocation)) {
+            showToast('Заполните название, описание и место', '⚠️');
+            return;
+        }
 
-    // Модалка для модератора, где он может изменить награду
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    modal.innerHTML = `
+        const finalTitle = title.slice(0, 50);
+        const finalDesc = desc.slice(0, 220);
+
+        // ФИКСИРОВАННАЯ НАГРАДА (только модератор сможет менять потом)
+        const xp = 100;
+        const coins = 50;
+        const isUrgent = document.getElementById('questUrgent').checked;
+
+        // Полная стоимость создания квеста
+        const cost = 200; // Фиксированная цена за создание квеста
+
+        if (currentUser.points < cost) {
+            showToast(`Недостаточно монет для создания квеста — ${cost} 🪙`, '💸');
+            return;
+        }
+
+        const createQuest = (imageData) => {
+            let lat, lng, address;
+            if (newQuestLocation) {
+                lat = newQuestLocation.lat;
+                lng = newQuestLocation.lng;
+                address = 'Метка на карте';
+            } else {
+                [address, lat, lng] = addressData.split('|');
+                lat = parseFloat(lat);
+                lng = parseFloat(lng);
+            }
+
+            // СПИСЫВАЕМ ПОЛНУЮ СТОИМОСТЬ
+            currentUser.points -= cost;
+            syncCurrentUser();
+
+            quests.push({
+                id: 'q_' + Date.now(),
+                title: finalTitle,
+                description: finalDesc,
+                xpReward: xp,
+                coinReward: coins,
+                lat,
+                lng,
+                address,
+                creatorId: currentUser.id,
+                status: 'pending', // На модерацию
+                isUrgent,
+                image: imageData || ''
+            });
+
+            save('ekb_quests', quests);
+            showToast(`Квест создан за ${cost} 🪙 и отправлен на модерацию`, '✅');
+            document.querySelector('.modal-overlay').remove();
+            renderMap();
+        };
+
+        if (imageFile) {
+            const reader = new FileReader();
+            reader.onload = () => createQuest(reader.result);
+            reader.readAsDataURL(imageFile);
+        } else {
+            createQuest('');
+        }
+    };
+
+    window.approveQuest = (questId) => {
+        const quest = quests.find(q => q.id === questId);
+        if (!quest) return;
+
+        // Модалка для модератора, где он может изменить награду
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
         <div class="modal-card">
             <h3 class="mb-1">Одобрение квеста</h3>
             <p class="text-muted mb-1">${quest.title}</p>
@@ -1406,34 +1405,34 @@ window.approveQuest = (questId) => {
             </div>
         </div>
     `;
-    document.body.appendChild(modal);
+        document.body.appendChild(modal);
 
-    modal.querySelector('#confirmApproveBtn').onclick = () => {
-        const newXP = parseInt(modal.querySelector('#editXP').value) || quest.xpReward;
-        const newCoins = parseInt(modal.querySelector('#editCoins').value) || quest.coinReward;
+        modal.querySelector('#confirmApproveBtn').onclick = () => {
+            const newXP = parseInt(modal.querySelector('#editXP').value) || quest.xpReward;
+            const newCoins = parseInt(modal.querySelector('#editCoins').value) || quest.coinReward;
 
-        quest.xpReward = newXP;
-        quest.coinReward = newCoins;
-        quest.status = 'active';
-        save('ekb_quests', quests);
+            quest.xpReward = newXP;
+            quest.coinReward = newCoins;
+            quest.status = 'active';
+            save('ekb_quests', quests);
 
-        showToast('Квест одобрен и появился на карте!', '✅');
-        modal.remove();
-        renderMod();
+            showToast('Квест одобрен и появился на карте!', '✅');
+            modal.remove();
+            renderMod();
 
-        if (currentPage === 'map' && mapInstance) {
-            refreshMapMarkers();
-        }
+            if (currentPage === 'map' && mapInstance) {
+                refreshMapMarkers();
+            }
+        };
     };
-};
 
-window.editQuest = (questId) => {
-    const quest = quests.find(q => q.id === questId);
-    if (!quest) return;
+    window.editQuest = (questId) => {
+        const quest = quests.find(q => q.id === questId);
+        if (!quest) return;
 
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    modal.innerHTML = `
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
                 <div class="modal-card">
                     <h3 class="mb-1">Редактировать квест</h3>
                     <input type="text" id="editTitle" value="${quest.title}" placeholder="Название">
@@ -1448,30 +1447,30 @@ window.editQuest = (questId) => {
                     </div>
                 </div>
             `;
-    document.body.appendChild(modal);
-};
+        document.body.appendChild(modal);
+    };
 
-window.saveEditedQuest = (questId) => {
-    const quest = quests.find(q => q.id === questId);
-    if (quest) {
-        quest.title = document.getElementById('editTitle').value;
-        quest.description = document.getElementById('editDesc').value;
-        quest.xpReward = parseInt(document.getElementById('editXP').value) || 100;
-        quest.coinReward = parseInt(document.getElementById('editCoins').value) || 50;
+    window.saveEditedQuest = (questId) => {
+        const quest = quests.find(q => q.id === questId);
+        if (quest) {
+            quest.title = document.getElementById('editTitle').value;
+            quest.description = document.getElementById('editDesc').value;
+            quest.xpReward = parseInt(document.getElementById('editXP').value) || 100;
+            quest.coinReward = parseInt(document.getElementById('editCoins').value) || 50;
 
-        save('ekb_quests', quests);
-        showToast('Изменения сохранены', '✅');
-        document.querySelector('.modal-overlay').remove();
-        renderMod();
-    }
-};
+            save('ekb_quests', quests);
+            showToast('Изменения сохранены', '✅');
+            document.querySelector('.modal-overlay').remove();
+            renderMod();
+        }
+    };
 
-// ==========================================
-// АВТОРИЗАЦИЯ
-// ==========================================
-function showAuthWall() {
-    const root = document.getElementById('appRoot');
-    root.innerHTML = `
+    // ==========================================
+    // АВТОРИЗАЦИЯ
+    // ==========================================
+    function showAuthWall() {
+        const root = document.getElementById('appRoot');
+        root.innerHTML = `
                 <div class="card text-center" style="margin-top: 2rem; padding: 3rem 1rem;">
                     <div class="avatar-lg mb-1">
                         <img src="https://picsum.photos/seed/guest/100/100" alt="Гость">
@@ -1483,12 +1482,12 @@ function showAuthWall() {
                     </button>
                 </div>
             `;
-}
+    }
 
-window.showLoginModal = () => {
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    modal.innerHTML = `
+    window.showLoginModal = () => {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
                 <div class="modal-card" style="max-width: 400px;">
                     <div class="tabs" style="margin-bottom: 1.5rem;">
                         <button class="tab-btn active" id="loginTab" onclick="switchAuthTab('login')">Вход</button>
@@ -1516,29 +1515,53 @@ window.showLoginModal = () => {
                     </div>
                 </div>
             `;
-    document.body.appendChild(modal);
+        document.body.appendChild(modal);
 
-    window.switchAuthTab = (tab) => {
-        const loginForm = modal.querySelector('#loginForm');
-        const registerForm = modal.querySelector('#registerForm');
-        const loginTab = modal.querySelector('#loginTab');
-        const registerTab = modal.querySelector('#registerTab');
+        window.switchAuthTab = (tab) => {
+            const loginForm = modal.querySelector('#loginForm');
+            const registerForm = modal.querySelector('#registerForm');
+            const loginTab = modal.querySelector('#loginTab');
+            const registerTab = modal.querySelector('#registerTab');
 
-        if (tab === 'login') {
-            loginForm.style.display = 'block';
-            registerForm.style.display = 'none';
-            loginTab.classList.add('active');
-            registerTab.classList.remove('active');
-        } else {
-            loginForm.style.display = 'none';
-            registerForm.style.display = 'block';
-            loginTab.classList.remove('active');
-            registerTab.classList.add('active');
-        }
-    };
+            if (tab === 'login') {
+                loginForm.style.display = 'block';
+                registerForm.style.display = 'none';
+                loginTab.classList.add('active');
+                registerTab.classList.remove('active');
+            } else {
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'block';
+                loginTab.classList.remove('active');
+                registerTab.classList.add('active');
+            }
+        };
 
-    modal.querySelector('#authBtn').onclick = () => {
         modal.querySelector('#authBtn').onclick = () => {
+            modal.querySelector('#authBtn').onclick = () => {
+                const l = modal.querySelector('#authLogin').value.trim();
+                const p = modal.querySelector('#authPass').value.trim();
+                if (!l || !p) return showToast('Заполните поля');
+
+                let user = allUsers.find(u => (u.login === l || u.email === l) && u.password === p);
+
+                if (!user) {
+                    return showToast('Неверный логин или пароль', '❌');
+                } else {
+                    user.isOnline = true;
+                    saveUserSession(user); // ← ДОБАВЬ ЭТУ СТРОКУ
+                    showToast('Успешный вход!', '🔓');
+                }
+
+                currentUser = user;
+                updateNavForRole();
+                modal.remove();
+
+                if (mapInstance) {
+                    mapInstance.setView([currentUser.location.lat, currentUser.location.lng], 14);
+                    refreshMapMarkers();
+                }
+                renderCurrentPage();
+            };
             const l = modal.querySelector('#authLogin').value.trim();
             const p = modal.querySelector('#authPass').value.trim();
             if (!l || !p) return showToast('Заполните поля');
@@ -1549,7 +1572,6 @@ window.showLoginModal = () => {
                 return showToast('Неверный логин или пароль', '❌');
             } else {
                 user.isOnline = true;
-                saveUserSession(user); // ← ДОБАВЬ ЭТУ СТРОКУ
                 showToast('Успешный вход!', '🔓');
             }
 
@@ -1563,32 +1585,53 @@ window.showLoginModal = () => {
             }
             renderCurrentPage();
         };
-        const l = modal.querySelector('#authLogin').value.trim();
-        const p = modal.querySelector('#authPass').value.trim();
-        if (!l || !p) return showToast('Заполните поля');
 
-        let user = allUsers.find(u => (u.login === l || u.email === l) && u.password === p);
-
-        if (!user) {
-            return showToast('Неверный логин или пароль', '❌');
-        } else {
-            user.isOnline = true;
-            showToast('Успешный вход!', '🔓');
-        }
-
-        currentUser = user;
-        updateNavForRole();
-        modal.remove();
-
-        if (mapInstance) {
-            mapInstance.setView([currentUser.location.lat, currentUser.location.lng], 14);
-            refreshMapMarkers();
-        }
-        renderCurrentPage();
-    };
-
-    modal.querySelector('#regBtn').onclick = () => {
         modal.querySelector('#regBtn').onclick = () => {
+            modal.querySelector('#regBtn').onclick = () => {
+                const name = modal.querySelector('#regName').value.trim();
+                const email = modal.querySelector('#regEmail').value.trim();
+                const pass = modal.querySelector('#regPass').value.trim();
+                const passConfirm = modal.querySelector('#regPassConfirm').value.trim();
+
+                if (!name || !email || !pass || !passConfirm) return showToast('Заполните все поля', '❌');
+                if (pass !== passConfirm) return showToast('Пароли не совпадают', '❌');
+                if (!email.includes('@mai.ru')) return showToast('Email должен быть @mai.ru', '❌');
+                if (allUsers.find(u => u.email === email)) return showToast('Email уже зарегистрирован', '❌');
+
+                const user = {
+                    id: 'u_' + Date.now(),
+                    name: name,
+                    email: email,
+                    login: email,
+                    password: pass,
+                    points: 50,
+                    xp: 0,
+                    level: 1,
+                    avatar: 'texture/avv1.jfif',
+                    background: '',
+                    completedQuests: [],
+                    location: EKIBASTUZ_COORDS,
+                    role: 'user',
+                    inventory: [],
+                    activeBoosts: [],
+                    frame: '',
+                    isOnline: true
+                };
+                allUsers.push(user);
+                save('ekb_users', allUsers);
+                saveUserSession(user); // ← ДОБАВЬ ЭТУ СТРОКУ
+                showToast('Аккаунт создан!', '🎉');
+
+                currentUser = user;
+                updateNavForRole();
+                modal.remove();
+
+                if (mapInstance) {
+                    mapInstance.setView([currentUser.location.lat, currentUser.location.lng], 14);
+                    refreshMapMarkers();
+                }
+                renderCurrentPage();
+            };
             const name = modal.querySelector('#regName').value.trim();
             const email = modal.querySelector('#regEmail').value.trim();
             const pass = modal.querySelector('#regPass').value.trim();
@@ -1608,7 +1651,7 @@ window.showLoginModal = () => {
                 points: 50,
                 xp: 0,
                 level: 1,
-                avatar: 'texture/avv1.jfif',
+                avatar: `https://picsum.photos/seed/${email}/100/100`,
                 background: '',
                 completedQuests: [],
                 location: EKIBASTUZ_COORDS,
@@ -1620,7 +1663,6 @@ window.showLoginModal = () => {
             };
             allUsers.push(user);
             save('ekb_users', allUsers);
-            saveUserSession(user); // ← ДОБАВЬ ЭТУ СТРОКУ
             showToast('Аккаунт создан!', '🎉');
 
             currentUser = user;
@@ -1633,136 +1675,93 @@ window.showLoginModal = () => {
             }
             renderCurrentPage();
         };
-        const name = modal.querySelector('#regName').value.trim();
-        const email = modal.querySelector('#regEmail').value.trim();
-        const pass = modal.querySelector('#regPass').value.trim();
-        const passConfirm = modal.querySelector('#regPassConfirm').value.trim();
+    }
 
-        if (!name || !email || !pass || !passConfirm) return showToast('Заполните все поля', '❌');
-        if (pass !== passConfirm) return showToast('Пароли не совпадают', '❌');
-        if (!email.includes('@mai.ru')) return showToast('Email должен быть @mai.ru', '❌');
-        if (allUsers.find(u => u.email === email)) return showToast('Email уже зарегистрирован', '❌');
-
-        const user = {
-            id: 'u_' + Date.now(),
-            name: name,
-            email: email,
-            login: email,
-            password: pass,
-            points: 50,
-            xp: 0,
-            level: 1,
-            avatar: `https://picsum.photos/seed/${email}/100/100`,
-            background: '',
-            completedQuests: [],
-            location: EKIBASTUZ_COORDS,
-            role: 'user',
-            inventory: [],
-            activeBoosts: [],
-            frame: '',
-            isOnline: true
-        };
-        allUsers.push(user);
-        save('ekb_users', allUsers);
-        showToast('Аккаунт создан!', '🎉');
-
-        currentUser = user;
-        updateNavForRole();
-        modal.remove();
-
-        if (mapInstance) {
-            mapInstance.setView([currentUser.location.lat, currentUser.location.lng], 14);
-            refreshMapMarkers();
+    window.logout = () => {
+        if (currentUser) {
+            currentUser.isOnline = false;
+            const dbU = allUsers.find(u => u.id === currentUser.id);
+            if (dbU) dbU.isOnline = false;
+            save('ekb_users', allUsers);
+            clearUserSession(); // ← ДОБАВЬ ЭТУ СТРОКУ
         }
+
+        currentUser = null;
+        updateNavForRole();
+        currentPage = 'map';
+        updateNavUI();
         renderCurrentPage();
+        showToast('Вы вышли из аккаунта', '👋');
     };
-}
 
-window.logout = () => {
-    if (currentUser) {
-        currentUser.isOnline = false;
-        const dbU = allUsers.find(u => u.id === currentUser.id);
-        if (dbU) dbU.isOnline = false;
-        save('ekb_users', allUsers);
-        clearUserSession(); // ← ДОБАВЬ ЭТУ СТРОКУ
-    }
+    // ==========================================
+    // НАВИГАЦИЯ
+    // ==========================================
+    function updateNavForRole() {
+        const nav = document.getElementById('bottomNav');
+        const modBtn = nav.querySelector('[data-page="mod"]');
 
-    currentUser = null;
-    updateNavForRole();
-    currentPage = 'map';
-    updateNavUI();
-    renderCurrentPage();
-    showToast('Вы вышли из аккаунта', '👋');
-};
-
-// ==========================================
-// НАВИГАЦИЯ
-// ==========================================
-function updateNavForRole() {
-    const nav = document.getElementById('bottomNav');
-    const modBtn = nav.querySelector('[data-page="mod"]');
-
-    if (currentUser?.role === 'moderator') {
-        if (!modBtn) {
-            const btn = document.createElement('button');
-            btn.className = 'bottom-nav-btn';
-            btn.dataset.page = 'mod';
-            btn.innerHTML = '<i class="fas fa-shield-alt"></i><span>Модер.</span>';
-            btn.onclick = () => navigateTo('mod');
-            nav.appendChild(btn);
+        if (currentUser?.role === 'moderator') {
+            if (!modBtn) {
+                const btn = document.createElement('button');
+                btn.className = 'bottom-nav-btn';
+                btn.dataset.page = 'mod';
+                btn.innerHTML = '<i class="fas fa-shield-alt"></i><span>Модер.</span>';
+                btn.onclick = () => navigateTo('mod');
+                nav.appendChild(btn);
+            }
+        } else {
+            if (modBtn) modBtn.remove();
         }
-    } else {
-        if (modBtn) modBtn.remove();
     }
-}
 
-function updateNavUI() {
+    function updateNavUI() {
+        document.querySelectorAll('.bottom-nav-btn').forEach(btn => {
+            if (btn.dataset.page === currentPage) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+    }
+
+    function navigateTo(page) {
+        currentPage = page;
+        updateNavUI();
+        renderCurrentPage();
+    }
+
+    function renderCurrentPage() {
+        const root = document.getElementById('appRoot');
+        root.style.animation = 'none';
+        root.offsetHeight;
+        root.style.animation = 'fadeIn 0.3s ease';
+
+        if (currentPage === 'map') renderMap();
+        else if (currentPage === 'quests') renderQuests();
+        else if (currentPage === 'donations') renderDonations();
+        else if (currentPage === 'shop') renderShop();
+        else if (currentPage === 'profile') renderProfile();
+        else if (currentPage === 'mod') renderMod();
+    }
+
+    // Биндинг навигации
     document.querySelectorAll('.bottom-nav-btn').forEach(btn => {
-        if (btn.dataset.page === currentPage) btn.classList.add('active');
-        else btn.classList.remove('active');
+        btn.addEventListener('click', () => navigateTo(btn.dataset.page));
     });
-}
 
-function navigateTo(page) {
-    currentPage = page;
-    updateNavUI();
-    renderCurrentPage();
-}
+    window.onload = () => {
+        initData();
 
-function renderCurrentPage() {
-    const root = document.getElementById('appRoot');
-    root.style.animation = 'none';
-    root.offsetHeight;
-    root.style.animation = 'fadeIn 0.3s ease';
+        // Загружаем сохранённого пользователя
+        const savedUser = loadUserSession();
+        if (savedUser) {
+            currentUser = savedUser;
+            updateNavForRole();
+            showToast('Добро пожаловать обратно, ' + currentUser.name + '!', '👋');
+        }
 
-    if (currentPage === 'map') renderMap();
-    else if (currentPage === 'quests') renderQuests();
-    else if (currentPage === 'donations') renderDonations();
-    else if (currentPage === 'shop') renderShop();
-    else if (currentPage === 'profile') renderProfile();
-    else if (currentPage === 'mod') renderMod();
-}
+        simulateOnlineUsers();
+        renderCurrentPage();
 
-// Биндинг навигации
-document.querySelectorAll('.bottom-nav-btn').forEach(btn => {
-    btn.addEventListener('click', () => navigateTo(btn.dataset.page));
-});
-
-window.onload = () => {
-    initData();
-
-    // Загружаем сохранённого пользователя
-    const savedUser = loadUserSession();
-    if (savedUser) {
-        currentUser = savedUser;
-        updateNavForRole();
-        showToast('Добро пожаловать обратно, ' + currentUser.name + '!', '👋');
-    }
-
-    simulateOnlineUsers();
-    renderCurrentPage();
-
-    setTimeout(() => {
-        showToast('Добро пожаловать в ECO JuniorCode! 🌱', '🏙️');
-    }, 1000);
-};
+        setTimeout(() => {
+            showToast('Добро пожаловать в ECO JuniorCode! 🌱', '🏙️');
+        }, 1000);
+    };
