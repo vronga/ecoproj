@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECO JuniorCode - Экибастуз</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Хедер с названием -->
+    <header class="header">
+        <h1><i class="fas fa-leaf"></i> ECO JuniorProg</h1>
+    </header>
+
+    <!-- Основной контент -->
+    <main id="appRoot"></main>
+
+    <!-- Нижняя навигация -->
+    <nav id="bottomNav">
+        <button class="bottom-nav-btn active" data-page="map">
+            <i class="fas fa-map"></i>
+            <span>Карта</span>
+        </button>
+        <button class="bottom-nav-btn" data-page="quests">
+            <i class="fas fa-tasks"></i>
+            <span>Квесты</span>
+        </button>
+        <button class="bottom-nav-btn" data-page="donations">
+            <i class="fas fa-hand-holding-heart"></i>
+            <span>Пожертвования</span>
+        </button>
+        <button class="bottom-nav-btn" data-page="shop">
+            <i class="fas fa-store"></i>
+            <span>Магазин</span>
+        </button>
+        <button class="bottom-nav-btn" data-page="profile">
+            <i class="fas fa-user"></i>
+            <span>Профиль</span>
+        </button>
+
+    <!-- Скрипты -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
