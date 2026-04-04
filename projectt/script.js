@@ -214,13 +214,13 @@ function initData() {
         shopItems = [
             // Аватары
             { id: 's_av1', type: 'avatar', value: 'texture/avv1.jfif', price: 300 },
-            { id: 's_av2', type: 'avatar', value: 'texture/avv2.jfif', price: 250},
-            { id: 's_av3', type: 'avatar', value: 'texture/avv3.jfif', price: 400},
-            { id: 's_av4', type: 'avatar', value: 'texture/avv4.jfif', price: 500},
+            { id: 's_av2', type: 'avatar', value: 'texture/avv2.jfif', price: 250 },
+            { id: 's_av3', type: 'avatar', value: 'texture/avv3.jfif', price: 400 },
+            { id: 's_av4', type: 'avatar', value: 'texture/avv4.jfif', price: 500 },
             // Фоны
-            { id: 's_bg1', name: 'фывфывфвф', type: 'background', value: 'texture/fonn1.jfif', price: 800},
-            { id: 's_bg2', name: 'Зелёный оазис', type: 'background', value: 'texture/fonn2.jfif', price: 600},
-            { id: 's_bg3', name: 'Горный закат', type: 'background', value: 'texture/fonn3.jfif', price: 1200}
+            { id: 's_bg1', name: 'фывфывфвф', type: 'background', value: 'texture/fonn1.jfif', price: 800 },
+            { id: 's_bg2', name: 'Зелёный оазис', type: 'background', value: 'texture/fonn2.jfif', price: 600 },
+            { id: 's_bg3', name: 'Горный закат', type: 'background', value: 'texture/fonn3.jfif', price: 1200 }
         ];
         save('ekb_shop', shopItems);
     } else shopItems = load('ekb_shop');
@@ -645,56 +645,48 @@ function renderShop() {
         </div>
         
         <div class="shop-grid">
-            ${shopItems.filter(i => i.type === (currentShopTab === 'backgrounds' ? 'background' :
-        currentShopTab === 'boosts' ? 'boost' : 'avatar')).map(item => {
-            const hasItem = currentUser.inventory.includes(item.id);
-            let btnHtml = '';
-            if (item.type === 'boost') {
-                btnHtml = `<button class="btn btn-accent" style="width: 100%; padding: 8px;" 
-                                         onclick="buyItem('${item.id}')">${item.price} 🪙</button>`;
+            ${(() => {
+            // Фильтруем по типу
+            let filteredItems = [];
+            if (currentShopTab === 'backgrounds') {
+                filteredItems = shopItems.filter(i => i.type === 'background');
             } else {
-                btnHtml = hasItem
-                    ? `<button class="btn btn-outline" style="width: 100%; padding: 8px; 
-                                             border-color: var(--success); color: var(--success)" 
-                                     onclick="equipItem('${item.id}')">Экипировать</button>`
-                    : `<button class="btn btn-primary" style="width: 100%; padding: 8px;" 
-                                     onclick="buyItem('${item.id}')">${item.price} 🪙</button>`;
+                filteredItems = shopItems.filter(i => i.type === 'avatar');
             }
 
-            // Для фонов - показываем картинку
-            if (item.type === 'background') {
-                return `
-                        <div class="shop-card">
-                            <div style="width: 100%; height: 100px; background-image: url('${item.value}'); background-size: cover; background-position: center; border-radius: 12px; margin-bottom: 0.75rem;"></div>
-                            <h4 style="font-size: 0.9rem;">${item.name}</h4>
-                            <p class="text-muted mb-1" style="font-size: 0.75rem;">${item.desc}</p>
-                            ${btnHtml}
-                        </div>
-                    `;
-            }
-            // Для аватаров
-            else if (item.type === 'avatar') {
-                return `
-                        <div class="shop-card">
-                            <img src="${item.value}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 12px; margin: 0 auto 0.75rem; display: block;">
-                            <h4 style="font-size: 0.9rem;">${item.name}</h4>
-                            <p class="text-muted mb-1" style="font-size: 0.75rem;">${item.desc}</p>
-                            ${btnHtml}
-                        </div>
-                    `;
-            }
-            // Для бустов
-            else {
-                return `
-                        <div class="shop-card">
-                            <div class="preview" style="font-size: 3rem; text-align: center;">⚡</div>
-                            <h4 style="font-size: 0.9rem;">${item.name}</h4>
-                            <p class="text-muted mb-1" style="font-size: 0.75rem;">${item.desc}</p>
-                            ${btnHtml}
-                        </div>
-                    `;
-            }
-        }).join('')}
+            // ✅ СОРТИРОВКА ПО ЦЕНЕ (от дешёвых к дорогим)
+            filteredItems.sort((a, b) => a.price - b.price);
+
+            return filteredItems.map(item => {
+                const hasItem = currentUser.inventory.includes(item.id);
+
+                // ✅ ИСПРАВЛЕНА ЗАГРУЗКА КАРТИНОК
+                if (item.type === 'background') {
+                    return `
+                            <div class="shop-card">
+                                <div style="width: 100%; height: 120px; background-image: url('${item.value}'); background-size: cover; background-position: center; border-radius: 12px; margin-bottom: 0.75rem;"></div>
+                                <h4 style="font-size: 0.9rem;">${item.name || 'Фон'}</h4>
+                                ${hasItem ?
+                            `<button class="btn btn-outline" style="width: 100%;" onclick="equipItem('${item.id}')">✅ Экипировать</button>` :
+                            `<button class="btn btn-primary" style="width: 100%;" onclick="buyItem('${item.id}')">${item.price} 🪙</button>`
+                        }
+                            </div>
+                        `;
+                } else {
+                    return `
+                            <div class="shop-card">
+                                <img src="${item.value}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 12px; margin: 0 auto 0.75rem; display: block;" 
+                                     onerror="this.src='https://via.placeholder.com/80?text=Avatar'">
+                                <h4 style="font-size: 0.9rem;">${item.name || 'Аватар'}</h4>
+                                ${hasItem ?
+                            `<button class="btn btn-outline" style="width: 100%;" onclick="equipItem('${item.id}')">✅ Экипировать</button>` :
+                            `<button class="btn btn-primary" style="width: 100%;" onclick="buyItem('${item.id}')">${item.price} 🪙</button>`
+                        }
+                            </div>
+                        `;
+                }
+            }).join('');
+        })()}
         </div>
     `;
 }
