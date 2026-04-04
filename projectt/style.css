@@ -737,25 +737,6 @@ select:focus {
     margin: 0.25rem 0.25rem 0 0;
 }
 
-/* Адаптивность */
-@media (max-width: 768px) {
-    .header h1 {
-        font-size: 1.2rem;
-    }
-
-    .shop-grid {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    }
-
-    .grid-2 {
-        grid-template-columns: 1fr;
-    }
-
-    .modal-card {
-        padding: 1.5rem;
-    }
-}
-
 /* Стиль для чекбокса "Срочный квест" */
 label {
     display: flex;
@@ -881,4 +862,667 @@ label:has(input[type="checkbox"]:checked) span {
 .file-upload-box .small-text {
     font-size: 0.7rem;
     margin-top: 0.25rem;
+}
+
+/* ========== АДАПТИВНОСТЬ ДЛЯ ВСЕХ УСТРОЙСТВ ========== */
+
+/* Планшеты и небольшие ноутбуки (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+    .header h1 {
+        font-size: 1.3rem;
+    }
+
+    #appRoot {
+        padding: 1.25rem;
+        padding-bottom: 85px;
+    }
+
+    .card {
+        padding: 1.1rem;
+    }
+
+    .btn {
+        padding: 0.7rem 1.3rem;
+        font-size: 0.95rem;
+    }
+
+    .map-container {
+        height: 380px;
+    }
+
+    .quest-marker {
+        width: 60px;
+        height: 60px;
+    }
+
+    .quest-marker .marker-name {
+        font-size: 0.6rem;
+        max-width: 58px;
+    }
+
+    .user-pin {
+        width: 50px;
+        height: 50px;
+    }
+
+    .user-marker {
+        width: 42px;
+        height: 42px;
+    }
+
+    .user-marker img {
+        width: 34px;
+        height: 34px;
+    }
+
+    .profile-header {
+        padding: 1.5rem;
+        min-height: 160px;
+    }
+
+    .avatar-lg {
+        width: 85px;
+        height: 85px;
+    }
+
+    .shop-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 0.9rem;
+    }
+
+    .shop-card {
+        padding: 0.9rem;
+    }
+
+    .preview {
+        width: 70px;
+        height: 70px;
+        font-size: 2rem;
+    }
+
+    .modal-card {
+        padding: 1.8rem;
+        max-width: 450px;
+    }
+
+    .grid-2 {
+        gap: 0.9rem;
+    }
+
+    .stat-box h4 {
+        font-size: 1.3rem;
+    }
+
+    .mini-profile-avatar {
+        width: 55px;
+        height: 55px;
+    }
+
+    .badge {
+        font-size: 0.8rem;
+        padding: 3px 10px;
+    }
+}
+
+/* Телефоны (до 767px) */
+@media (max-width: 767px) {
+    .header {
+        padding: 0.8rem;
+    }
+
+    .header h1 {
+        font-size: 1.2rem;
+    }
+
+    #appRoot {
+        padding: 0.8rem;
+        padding-bottom: 70px;
+    }
+
+    .card {
+        padding: 1rem;
+        margin-bottom: 0.8rem;
+    }
+
+    .btn {
+        padding: 0.65rem 1.2rem;
+        font-size: 0.9rem;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .btn-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .bottom-nav-btn {
+        font-size: 0.75rem;
+        padding: 0.4rem;
+    }
+
+    .bottom-nav-btn i {
+        font-size: 1.1rem;
+    }
+
+    .map-container {
+        height: 350px;
+        margin-top: 0.8rem;
+    }
+
+    .quest-marker {
+        width: 55px;
+        height: 55px;
+    }
+
+    .quest-marker .marker-name {
+        font-size: 0.55rem;
+        max-width: 50px;
+        margin-top: 2px;
+    }
+
+    .user-pin {
+        width: 45px;
+        height: 45px;
+    }
+
+    .user-pin-name {
+        top: -24px;
+        font-size: 0.65rem;
+        padding: 2px 6px;
+        white-space: nowrap;
+    }
+
+    .user-marker {
+        width: 38px;
+        height: 38px;
+        padding: 3px;
+    }
+
+    .user-marker img {
+        width: 30px;
+        height: 30px;
+    }
+
+    .user-label {
+        font-size: 0.7rem;
+        padding: 3px 6px;
+    }
+
+    .profile-header {
+        padding: 1.2rem;
+        min-height: 140px;
+    }
+
+    .avatar-lg {
+        width: 75px;
+        height: 75px;
+    }
+
+    .progress-container {
+        height: 6px;
+    }
+
+    .badge {
+        font-size: 0.75rem;
+        padding: 3px 8px;
+    }
+
+    .list-item {
+        padding: 0.8rem;
+        margin-bottom: 0.6rem;
+    }
+
+    .tabs {
+        gap: 0.4rem;
+    }
+
+    .tab-btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
+    }
+
+    .shop-grid {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 0.8rem;
+    }
+
+    .shop-card {
+        padding: 0.8rem;
+    }
+
+    .preview {
+        width: 65px;
+        height: 65px;
+        font-size: 1.8rem;
+        margin-bottom: 0.6rem;
+    }
+
+    .modal-overlay {
+        padding: 0.8rem;
+    }
+
+    .modal-card {
+        padding: 1.2rem;
+        max-width: 95%;
+    }
+
+    input, textarea, select {
+        padding: 0.7rem;
+        font-size: 0.95rem;
+        margin: 0.4rem 0;
+    }
+
+    .flex-between {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+
+    .grid-2 {
+        grid-template-columns: 1fr;
+        gap: 0.8rem;
+    }
+
+    .stat-box {
+        padding: 0.8rem;
+    }
+
+    .stat-box h4 {
+        font-size: 1.2rem;
+        margin: 0.3rem 0;
+    }
+
+    .toast {
+        bottom: 80px;
+        padding: 0.8rem 1.2rem;
+        font-size: 0.85rem;
+        max-width: 90%;
+        width: max-content;
+    }
+
+    .mini-profile {
+        padding: 1rem;
+    }
+
+    .mini-profile-header {
+        gap: 0.8rem;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .mini-profile-avatar {
+        width: 70px;
+        height: 70px;
+    }
+
+    .mini-profile-info h3 {
+        font-size: 1.1rem;
+    }
+
+    label {
+        gap: 8px;
+    }
+
+    label span {
+        font-size: 0.9rem;
+    }
+
+    label input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+    }
+
+    .file-upload-box {
+        padding: 0.8rem;
+    }
+
+    .file-upload-box i {
+        font-size: 1.8rem;
+    }
+
+    .file-upload-box p {
+        font-size: 0.8rem;
+    }
+}
+
+/* Очень маленькие телефоны (до 480px) */
+@media (max-width: 480px) {
+    .header h1 {
+        font-size: 1.1rem;
+    }
+
+    #appRoot {
+        padding: 0.7rem;
+        padding-bottom: 65px;
+    }
+
+    .card {
+        padding: 0.9rem;
+    }
+
+    .btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
+    }
+
+    .bottom-nav-btn {
+        font-size: 0.7rem;
+    }
+
+    .bottom-nav-btn i {
+        font-size: 1rem;
+    }
+
+    .map-container {
+        height: 300px;
+    }
+
+    .quest-marker {
+        width: 48px;
+        height: 48px;
+    }
+
+    .quest-marker .marker-name {
+        font-size: 0.5rem;
+        max-width: 44px;
+        padding: 1px 3px;
+    }
+
+    .user-pin {
+        width: 40px;
+        height: 40px;
+    }
+
+    .user-marker {
+        width: 34px;
+        height: 34px;
+    }
+
+    .user-marker img {
+        width: 26px;
+        height: 26px;
+    }
+
+    .profile-header {
+        padding: 1rem;
+        min-height: 120px;
+    }
+
+    .avatar-lg {
+        width: 65px;
+        height: 65px;
+    }
+
+    .shop-grid {
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+        gap: 0.7rem;
+    }
+
+    .shop-card h4 {
+        font-size: 0.85rem;
+    }
+
+    .shop-card p {
+        font-size: 0.8rem;
+    }
+
+    .preview {
+        width: 55px;
+        height: 55px;
+        font-size: 1.5rem;
+    }
+
+    .tab-btn {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.8rem;
+    }
+
+    .modal-card {
+        padding: 1rem;
+    }
+
+    input, textarea, select {
+        padding: 0.6rem;
+        font-size: 0.9rem;
+    }
+
+    .stat-box h4 {
+        font-size: 1.1rem;
+    }
+
+    .badge {
+        font-size: 0.7rem;
+        padding: 2px 6px;
+    }
+}
+
+/* Для телефонов с очень маленькой шириной (до 360px) */
+@media (max-width: 360px) {
+    .shop-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .preview {
+        width: 50px;
+        height: 50px;
+        font-size: 1.3rem;
+    }
+
+    .shop-card h4 {
+        font-size: 0.8rem;
+    }
+
+    .bottom-nav-btn span {
+        font-size: 0.65rem;
+    }
+
+    .bottom-nav-btn i {
+        font-size: 0.95rem;
+    }
+
+    .quest-marker {
+        width: 44px;
+        height: 44px;
+    }
+
+    .user-pin {
+        width: 36px;
+        height: 36px;
+    }
+}
+
+/* Ландшафтная ориентация на телефонах */
+@media (max-width: 768px) and (orientation: landscape) {
+    .header {
+        padding: 0.5rem;
+    }
+
+    .header h1 {
+        font-size: 1rem;
+    }
+
+    #appRoot {
+        padding-bottom: 60px;
+    }
+
+    .map-container {
+        height: 250px;
+    }
+
+    .profile-header {
+        min-height: 100px;
+        padding: 0.8rem;
+    }
+
+    .avatar-lg {
+        width: 55px;
+        height: 55px;
+    }
+
+    .modal-card {
+        max-height: 85vh;
+    }
+
+    .bottom-nav-btn span {
+        display: none;
+    }
+
+    .bottom-nav-btn i {
+        font-size: 1.3rem;
+    }
+
+    .bottom-nav-btn {
+        padding: 0.3rem;
+    }
+}
+
+/* Планшеты в ландшафтной ориентации */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
+    .map-container {
+        height: 400px;
+    }
+
+    .profile-header {
+        min-height: 150px;
+    }
+
+    .shop-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    }
+}
+
+/* Десктопы и большие экраны (1025px и выше) */
+@media (min-width: 1025px) {
+    #appRoot {
+        max-width: 1200px;
+        margin: 0 auto;
+        width: 100%;
+        padding-bottom: 80px;
+    }
+
+    .header h1 {
+        font-size: 1.6rem;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    }
+
+    .map-container {
+        height: 450px;
+    }
+
+    .shop-grid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 1.2rem;
+    }
+
+    .shop-card:hover {
+        transform: translateY(-3px);
+    }
+
+    .grid-2 {
+        gap: 1.2rem;
+    }
+
+    .profile-header {
+        min-height: 200px;
+    }
+
+    .avatar-lg {
+        width: 110px;
+        height: 110px;
+    }
+
+    .stat-box:hover {
+        transform: translateY(-2px);
+    }
+}
+
+/* Для экранов с высоким разрешением (Retina) */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .quest-marker,
+    .user-marker,
+    .avatar-lg {
+        border-width: 2px;
+    }
+}
+
+/* Улучшения для touch-устройств */
+@media (hover: none) and (pointer: coarse) {
+    .btn:hover,
+    .bottom-nav-btn:hover,
+    .card:hover,
+    .shop-card:hover,
+    .list-item:hover,
+    .stat-box:hover {
+        transform: none;
+    }
+
+    .btn:active {
+        transform: scale(0.97);
+    }
+
+    .bottom-nav-btn:active {
+        transform: scale(0.95);
+    }
+
+    .card:active {
+        transform: scale(0.99);
+    }
+
+    .shop-card:active {
+        transform: scale(0.98);
+    }
+
+    .quest-marker:active {
+        transform: scale(0.95);
+    }
+}
+
+/* Скрытие скроллбара на мобильных, но с сохранением функционала */
+@media (max-width: 768px) {
+    ::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
+    }
+
+    .tabs {
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+    }
+}
+
+/* Улучшенная читаемость на маленьких экранах */
+@media (max-width: 480px) {
+    .text-muted {
+        font-size: 0.85rem;
+    }
+
+    h2, h3 {
+        font-size: 1.1rem;
+    }
+
+    p {
+        font-size: 0.9rem;
+    }
+}
+
+/* Безопасная зона для iPhone с вырезом */
+@supports (padding: max(0px)) {
+    #bottomNav {
+        padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+    }
+
+    .header {
+        padding-top: max(1rem, env(safe-area-inset-top));
+    }
+
+    #appRoot {
+        padding-left: max(1rem, env(safe-area-inset-left));
+        padding-right: max(1rem, env(safe-area-inset-right));
+    }
 }
