@@ -4,40 +4,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Экибастуз: Город Квестов</title>
+    <title>ECO JuniorCode - Экибастуз</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #3b82f6;
-            --primary-dark: #2563eb;
-            --secondary: #8b5cf6;
-            --accent: #10b981;
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --secondary: #6366f1;
+            --accent: #f59e0b;
             --danger: #ef4444;
-            --warning: #f59e0b;
             --surface: #1f2937;
             --surface-light: #374151;
             --text: #f3f4f6;
             --text-muted: #9ca3af;
-            --border: #4b5563;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-            --radius: 12px;
-        }
-
-        [data-theme="light"] {
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --secondary: #7c3aed;
-            --accent: #059669;
-            --danger: #dc2626;
-            --warning: #d97706;
-            --surface: #ffffff;
-            --surface-light: #f3f4f6;
-            --text: #111827;
-            --text-muted: #6b7280;
-            --border: #e5e7eb;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            --radius: 16px;
+            --success: #34d399;
         }
 
         * {
@@ -47,117 +31,82 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: var(--surface);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             color: var(--text);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            transition: background 0.3s, color 0.3s;
         }
 
-        .app-header {
-            background: var(--surface-light);
+        /* Хедер с названием */
+        .header {
+            background: var(--surface);
             padding: 1rem;
-            box-shadow: var(--shadow);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            position: relative;
             z-index: 1000;
         }
 
-        .header-title {
+        .header h1 {
             font-size: 1.5rem;
-            font-weight: bold;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            display: inline-block;
         }
 
-        .header-stats {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
-
-        .stat-badge {
-            background: var(--surface);
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-weight: 600;
-        }
-
-        .theme-toggle {
-            background: var(--surface);
-            border: 2px solid var(--border);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .theme-toggle:hover {
-            transform: scale(1.1);
-            border-color: var(--primary);
-        }
-
-        .app-content {
+        /* Основной контент */
+        #appRoot {
             flex: 1;
             padding: 1rem;
             padding-bottom: 80px;
             overflow-y: auto;
+            animation: fadeIn 0.3s ease;
         }
 
+        /* Карточки */
         .card {
-            background: var(--surface-light);
+            background: var(--surface);
             border-radius: var(--radius);
-            padding: 1rem;
+            padding: 1.25rem;
             margin-bottom: 1rem;
             box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             transition: transform 0.2s, box-shadow 0.2s;
         }
 
         .card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 12px -2px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
         }
 
-        .badge {
-            background: var(--primary);
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            display: inline-block;
-        }
-
+        /* Кнопки */
         .btn {
             background: var(--primary);
             color: white;
             border: none;
             padding: 0.75rem 1.5rem;
-            border-radius: 8px;
+            border-radius: 12px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 0.5rem;
         }
 
         .btn:hover {
             background: var(--primary-dark);
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
         }
 
         .btn-outline {
@@ -179,67 +128,50 @@
             background: #dc2626;
         }
 
+        .btn-secondary {
+            background: var(--surface-light);
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
         .btn-accent {
             background: var(--accent);
         }
 
         .btn-accent:hover {
-            background: #059669;
+            background: #d97706;
         }
 
-        .btn-secondary {
-            background: var(--surface);
-            border: 2px solid var(--border);
-            color: var(--text);
-        }
-
-        .btn-secondary:hover {
-            background: var(--border);
-        }
-
-        .progress-container {
-            background: var(--surface);
-            height: 8px;
-            border-radius: 4px;
-            overflow: hidden;
-            margin: 0.5rem 0;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary), var(--accent));
-            transition: width 0.5s ease;
-        }
-
-        .donation-fill {
-            background: linear-gradient(90deg, var(--warning), var(--danger));
-        }
-
-        .bottom-nav {
+        /* Нижняя навигация */
+        #bottomNav {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            background: var(--surface-light);
+            background: var(--surface);
             display: flex;
             justify-content: space-around;
-            padding: 0.5rem;
-            box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.3);
+            padding: 0.75rem;
+            box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.3);
             z-index: 1000;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .bottom-nav-btn {
-            background: transparent;
+            background: none;
             border: none;
             color: var(--text-muted);
-            padding: 0.5rem;
+            font-size: 0.85rem;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
+            padding: 0.5rem;
+            border-radius: 12px;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 0.25rem;
-            font-size: 0.75rem;
         }
 
         .bottom-nav-btn i {
@@ -248,39 +180,372 @@
 
         .bottom-nav-btn.active {
             color: var(--primary);
+            background: rgba(16, 185, 129, 0.1);
         }
 
         .bottom-nav-btn:hover {
             color: var(--primary);
+            transform: translateY(-2px);
         }
 
+        /* Карта */
         .map-container {
-            height: 400px;
+            height: 420px;
             border-radius: var(--radius);
             overflow: hidden;
             margin-top: 1rem;
+            border: 2px solid var(--surface-light);
+        }
+
+        /* Маркеры на карте */
+        .quest-marker {
+            width: 42px;
+            height: 42px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 1rem;
+            font-weight: 700;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+            border: 3px solid transparent;
+            color: white;
+            text-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+            transition: transform 0.25s ease;
         }
 
         .quest-marker {
-            background: var(--surface-light);
-            padding: 0.5rem;
-            border-radius: 8px;
-            font-weight: bold;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+            color: white;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .quest-marker .marker-name {
+            margin-top: 4px;
+            max-width: 68px;
+            font-size: 0.65rem;
+            line-height: 1.1;
+            text-align: center;
+            padding: 2px 5px;
+            background: rgba(0, 0, 0, 0.28);
+            border-radius: 999px;
+        }
+
+        .quest-marker.normal {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-color: #0f766e;
+        }
+
+        .quest-marker.urgent {
+            background: linear-gradient(135deg, var(--danger), #f97316);
+            border-color: #dc2626;
+            animation: pulse 1.8s ease-in-out infinite;
+        }
+
+        .quest-marker:hover {
+            transform: scale(1.1);
+        }
+
+        @keyframes pulse {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.15);
+            }
+        }
+
+        @keyframes rainbow {
+            0% { border-image-source: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3); }
+            14% { border-image-source: linear-gradient(45deg, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000); }
+            28% { border-image-source: linear-gradient(45deg, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000, #ff7f00); }
+            42% { border-image-source: linear-gradient(45deg, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000, #ff7f00, #ffff00); }
+            57% { border-image-source: linear-gradient(45deg, #0000ff, #4b0082, #9400d3, #ff0000, #ff7f00, #ffff00, #00ff00); }
+            71% { border-image-source: linear-gradient(45deg, #4b0082, #9400d3, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff); }
+            85% { border-image-source: linear-gradient(45deg, #9400d3, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082); }
+            100% { border-image-source: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3); }
+        }
+
+        .user-pin {
+            position: relative;
+            width: 58px;
+            height: 58px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .user-pin-name {
+            position: absolute;
+            top: -28px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(31, 41, 55, 0.92);
+            color: var(--text);
+            padding: 3px 8px;
+            font-size: 0.7rem;
+            border-radius: 999px;
             white-space: nowrap;
-            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
         .user-marker {
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+            background: var(--surface);
+            border-radius: 50%;
+            padding: 4px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+            border: 3px solid var(--secondary);
+            transition: all 0.3s ease;
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
         }
 
+        .user-marker:hover {
+            transform: scale(1.1);
+            border-color: var(--accent);
+        }
+
+        .user-marker img {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .user-label {
+            background: var(--surface);
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--surface-light);
+            margin-top: 4px;
+        }
+
+        .leaflet-popup-content-wrapper {
+            background: #111827 !important;
+            color: var(--text) !important;
+            border-radius: 18px !important;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.45) !important;
+        }
+
+        .leaflet-popup-content {
+            margin: 0 !important;
+            color: var(--text) !important;
+        }
+
+        .leaflet-popup-tip {
+            background: #111827 !important;
+        }
+
+        .avatar-lg {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto;
+            overflow: hidden;
+            border: 3px solid var(--primary);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .avatar-lg::after {
+            content: '';
+            position: absolute;
+            inset: -10px;
+            border-radius: 50%;
+            border: 2px solid rgba(16, 185, 129, 0.35);
+            animation: pulseRing 4s ease infinite;
+        }
+
+        @keyframes pulseRing {
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.65;
+            }
+            50% {
+                transform: scale(1.05);
+                opacity: 1;
+            }
+        }
+
+        /* Профиль */
+        .profile-header {
+            background: linear-gradient(135deg, var(--surface), var(--surface-light));
+            border-radius: var(--radius);
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .profile-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('https://images.unsplash.com/photo-1519904981063-b0cf448d479e?q=80&w=1000') center/cover;
+            opacity: 0.1;
+            z-index: 0;
+        }
+
+        .profile-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .avatar-lg {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 0 auto;
+            overflow: hidden;
+            border: 3px solid var(--primary);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .avatar-lg img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Прогресс бары */
+        .progress-container {
+            background: var(--surface-light);
+            height: 8px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .donation-fill {
+            background: linear-gradient(90deg, var(--secondary), var(--primary));
+        }
+
+        /* Бейджи */
+        .badge {
+            background: var(--surface-light);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            display: inline-block;
+            margin: 0.25rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Списки */
+        .list-item {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            border-left: 4px solid var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        .list-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .list-item.urgent {
+            border-left-color: var(--danger);
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        /* Магазин */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+
+        .tab-btn {
+            background: var(--surface-light);
+            border: none;
+            color: var(--text-muted);
+            padding: 0.75rem 1.25rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            font-weight: 600;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .shop-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .shop-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .preview {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 0.75rem;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            background: var(--surface-light);
+        }
+
+        /* Модальные окна */
         .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.8);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -289,9 +554,9 @@
         }
 
         .modal-card {
-            background: var(--surface-light);
+            background: var(--surface);
             border-radius: var(--radius);
-            padding: 1.5rem;
+            padding: 2rem;
             max-width: 500px;
             width: 100%;
             max-height: 90vh;
@@ -304,258 +569,47 @@
                 transform: translateY(50px);
                 opacity: 0;
             }
+
             to {
                 transform: translateY(0);
                 opacity: 1;
             }
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .toast {
-            position: fixed;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--surface);
-            color: var(--text);
-            padding: 1rem 1.5rem;
-            border-radius: 50px;
-            box-shadow: var(--shadow);
-            z-index: 3000;
-            animation: toastSlide 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        @keyframes toastSlide {
-            from {
-                transform: translateX(-50%) translateY(20px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(-50%) translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .shop-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .shop-card {
-            background: var(--surface);
-            border-radius: var(--radius);
-            padding: 1rem;
-            text-align: center;
-            transition: all 0.3s;
-        }
-
-        .shop-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.2);
-        }
-
-        .preview {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 0.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.5rem;
+        /* Формы */
+        input,
+        textarea,
+        select {
+            width: 100%;
             background: var(--surface-light);
-            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text);
+            padding: 0.75rem;
+            border-radius: 10px;
+            margin: 0.5rem 0;
+            font-size: 1rem;
+            transition: all 0.3s ease;
         }
 
-        .profile-header {
-            position: relative;
-            height: 200px;
-            border-radius: var(--radius);
-            overflow: hidden;
-            margin-bottom: 1rem;
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
         }
 
-        .profile-content {
-            position: absolute;
-            bottom: 1rem;
-            left: 1rem;
-            right: 1rem;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 1rem;
-            border-radius: var(--radius);
-            backdrop-filter: blur(10px);
-        }
-
-        .avatar-lg {
-            width: 80px;
-            height: 80px;
-            background: var(--surface);
-            border-radius: 50%;
+        /* Утилиты */
+        .flex-between {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-            margin: 0 auto;
         }
 
         .grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 0.5rem;
-        }
-
-        .stat-box {
-            background: var(--surface);
-            padding: 1rem;
-            border-radius: var(--radius);
-            text-align: center;
-        }
-
-        .stat-box h4 {
-            font-size: 1.5rem;
-            margin: 0.5rem 0;
-        }
-
-        .tabs {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-            overflow-x: auto;
-        }
-
-        .tab-btn {
-            background: var(--surface);
-            border: none;
-            color: var(--text-muted);
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            white-space: nowrap;
-        }
-
-        .tab-btn.active {
-            background: var(--primary);
-            color: white;
-        }
-
-        .tab-btn:hover {
-            background: var(--primary);
-            color: white;
-        }
-
-        .list-item {
-            background: var(--surface-light);
-            padding: 1rem;
-            border-radius: var(--radius);
-            margin-bottom: 0.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.3s;
-        }
-
-        .list-item:hover {
-            transform: translateX(4px);
-        }
-
-        .list-item.urgent {
-            border-left: 4px solid var(--danger);
-        }
-
-        .chat-container {
-            height: 400px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 1rem;
-            background: var(--surface);
-            border-radius: var(--radius);
-            margin-bottom: 1rem;
-        }
-
-        .chat-message {
-            margin-bottom: 1rem;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .chat-header {
-            font-weight: bold;
-            color: var(--primary);
-            margin-bottom: 0.25rem;
-        }
-
-        .chat-text {
-            background: var(--surface-light);
-            padding: 0.5rem;
-            border-radius: 8px;
-            display: inline-block;
-        }
-
-        .chat-input-container {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .chat-input {
-            flex: 1;
-            padding: 0.75rem;
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            background: var(--surface);
-            color: var(--text);
-            font-size: 1rem;
-        }
-
-        .chat-input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        .request-card {
-            border-left: 4px solid var(--warning);
-        }
-
-        .photo-preview {
-            width: 100%;
-            max-height: 200px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-top: 0.5rem;
-        }
-
-        .photo-upload-btn {
-            background: var(--surface);
-            border: 2px dashed var(--border);
-            color: var(--text-muted);
-            padding: 2rem;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: center;
-        }
-
-        .photo-upload-btn:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        .flex-between {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            gap: 1rem;
         }
 
         .text-center {
@@ -574,259 +628,343 @@
             margin-bottom: 1rem;
         }
 
-        .urgent {
-            animation: pulse 2s infinite;
+        .mr-1 {
+            margin-right: 1rem;
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
+        /* Анимации */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
-        input, textarea {
+        /* Уведомления */
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
             background: var(--surface);
             color: var(--text);
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            padding: 0.75rem;
-            width: 100%;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            z-index: 3000;
+            animation: slideUp 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Статистика */
+        .stat-box {
+            background: var(--surface-light);
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-box:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-box h4 {
+            font-size: 1.5rem;
+            margin: 0.5rem 0;
+            color: var(--text);
+        }
+
+        /* Мини-профиль пользователя */
+        .mini-profile {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .mini-profile-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
             margin-bottom: 1rem;
-            font-size: 1rem;
-            transition: border-color 0.3s;
         }
 
-        input:focus, textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        .edit-profile-btn {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: rgba(0, 0, 0, 0.5);
-            border: none;
-            color: white;
-            padding: 0.5rem;
+        .mini-profile-avatar {
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.3s;
+            overflow: hidden;
+            border: 2px solid var(--primary);
         }
 
-        .edit-profile-btn:hover {
-            background: var(--primary);
-            transform: scale(1.1);
+        .mini-profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .mini-profile-info h3 {
+            margin: 0;
+            color: var(--text);
+        }
+
+        .mini-profile-info .badge {
+            margin: 0.25rem 0.25rem 0 0;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.2rem;
+            }
+
+            .shop-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-card {
+                padding: 1.5rem;
+            }
         }
     </style>
 </head>
 
-<body data-theme="dark">
-    <header class="app-header">
-        <div class="header-title">
-            <i class="fas fa-city"></i> Экибастуз
-        </div>
-        <div class="header-stats">
-            <div id="userStats" class="stat-badge" style="display: none;">
-                <i class="fas fa-coins"></i>
-                <span id="userCoins">0</span>
-            </div>
-            <div id="userLevel" class="stat-badge" style="display: none;">
-                <i class="fas fa-star"></i>
-                <span id="userLvl">1</span>
-            </div>
-            <button class="theme-toggle" onclick="toggleTheme()">
-                <i class="fas fa-moon" id="themeIcon"></i>
-            </button>
-        </div>
+<body>
+    <!-- Хедер с названием -->
+    <header class="header">
+        <h1><i class="fas fa-leaf"></i> ECO JuniorCode</h1>
     </header>
 
-    <main class="app-content" id="appRoot">
-        <!-- Динамический контент -->
-    </main>
+    <!-- Основной контент -->
+    <main id="appRoot"></main>
 
-    <nav class="bottom-nav" id="bottomNav">
-        <button class="bottom-nav-btn active" data-page="map" onclick="navigateTo('map')">
+    <!-- Нижняя навигация -->
+    <nav id="bottomNav">
+        <button class="bottom-nav-btn active" data-page="map">
             <i class="fas fa-map"></i>
             <span>Карта</span>
         </button>
-        <button class="bottom-nav-btn" data-page="quests" onclick="navigateTo('quests')">
+        <button class="bottom-nav-btn" data-page="quests">
             <i class="fas fa-tasks"></i>
             <span>Квесты</span>
         </button>
-        <button class="bottom-nav-btn" data-page="requests" onclick="navigateTo('requests')">
-            <i class="fas fa-exclamation-triangle"></i>
-            <span>Запросы</span>
+        <button class="bottom-nav-btn" data-page="donations">
+            <i class="fas fa-hand-holding-heart"></i>
+            <span>Пожертвования</span>
         </button>
-        <button class="bottom-nav-btn" data-page="chat" onclick="navigateTo('chat')">
-            <i class="fas fa-comments"></i>
-            <span>Чат</span>
-        </button>
-        <button class="bottom-nav-btn" data-page="shop" onclick="navigateTo('shop')">
+        <button class="bottom-nav-btn" data-page="shop">
             <i class="fas fa-store"></i>
             <span>Магазин</span>
         </button>
-        <button class="bottom-nav-btn" data-page="profile" onclick="navigateTo('profile')">
+        <button class="bottom-nav-btn" data-page="profile">
             <i class="fas fa-user"></i>
             <span>Профиль</span>
         </button>
     </nav>
 
+    <!-- Скрипты -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
     <script>
         // ==========================================
         // ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
         // ==========================================
-        const EKIBASTUZ_COORDS = { lat: 51.7344, lng: 72.4231 };
         let currentUser = null;
         let allUsers = [];
         let quests = [];
         let donations = [];
         let shopItems = [];
         let submissions = [];
-        let requests = [];
-        let chatMessages = [];
         let mapInstance = null;
         let markersLayer = null;
         let routingControl = null;
         let currentPage = 'map';
         let currentShopTab = 'avatars';
         let onlineInterval = null;
-        let lastChatTime = 0;
+        let newQuestLocation = null;
+        let newQuestTempMarker = null;
+
+        // Координаты Экибастуза
+        const EKIBASTUZ_COORDS = { lat: 51.7273, lng: 72.4163 };
+
+        // Адреса Экибастуза для создания квестов
+        const EKIBASTUZ_ADDRESSES = [
+            { name: "Парк Победы", lat: 51.7350, lng: 72.4250 },
+            { name: "Центральная площадь", lat: 51.7273, lng: 72.4163 },
+            { name: "ЖД Вокзал", lat: 51.7200, lng: 72.4100 },
+            { name: "Торговый центр", lat: 51.7300, lng: 72.4200 },
+            { name: "Школа №1", lat: 51.7250, lng: 72.4150 },
+            { name: "Больница", lat: 51.7400, lng: 72.4300 },
+            { name: "Стадион", lat: 51.7220, lng: 72.4080 },
+            { name: "Музей", lat: 51.7280, lng: 72.4180 }
+        ];
 
         // ==========================================
         // ИНИЦИАЛИЗАЦИЯ ДАННЫХ
         // ==========================================
         function initData() {
-            // Загрузка пользователей
+            // Пользователи
             if (!localStorage.getItem('ekb_users')) {
                 allUsers = [
                     {
                         id: 'mod_1',
-                        name: 'Модератор',
-                        email: 'mod@ekb.kz',
+                        name: 'Админ Эко',
+                        email: 'moderationforsitebeta67',
                         login: 'moderationforsitebeta67',
                         password: '12345676767aoao',
-                        points: 1000,
-                        xp: 500,
-                        level: 3,
-                        avatar: '👑',
-                        background: '',
-                        completedQuests: [],
-                        location: EKIBASTUZ_COORDS,
+                        points: 5000,
+                        xp: 2500,
+                        level: 6,
+                        avatar: 'https://picsum.photos/seed/admin/100/100',
+                        background: 'url(https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1000)',
                         role: 'moderator',
-                        inventory: [],
+                        location: EKIBASTUZ_COORDS,
+                        inventory: ['s_av1', 's_bg1'],
+                        completedQuests: [],
+                        isOnline: true,
                         activeBoosts: [],
-                        isOnline: true
+                        frame: ''
+                    },
+                    {
+                        id: 'user_1',
+                        name: 'Алексей',
+                        email: 'alex@example.com',
+                        login: 'alex',
+                        password: '123',
+                        points: 300,
+                        xp: 450,
+                        level: 3,
+                        avatar: 'https://picsum.photos/seed/alex/100/100',
+                        background: '',
+                        role: 'user',
+                        location: { lat: 51.73, lng: 72.42 },
+                        inventory: [],
+                        completedQuests: [],
+                        isOnline: true,
+                        activeBoosts: [],
+                        frame: ''
+                    },
+                    {
+                        id: 'user_2',
+                        name: 'Мария',
+                        email: 'maria@example.com',
+                        login: 'maria',
+                        password: '123',
+                        points: 150,
+                        xp: 200,
+                        level: 2,
+                        avatar: 'https://picsum.photos/seed/maria/100/100',
+                        background: '',
+                        role: 'user',
+                        location: { lat: 51.72, lng: 72.41 },
+                        inventory: [],
+                        completedQuests: [],
+                        isOnline: true,
+                        activeBoosts: [],
+                        frame: ''
                     }
                 ];
                 save('ekb_users', allUsers);
             } else allUsers = load('ekb_users');
 
-            // Загрузка квестов
+            // Квесты
             if (!localStorage.getItem('ekb_quests')) {
                 quests = [
                     {
-                        id: 'q1',
-                        title: 'Уборка парка',
-                        description: 'Собери мусор в центральном парке',
+                        id: 'q_1',
+                        title: 'Уборка парка Победы',
+                        description: 'Собери мусор в парке и сделай фото до/после',
                         xpReward: 150,
-                        coinReward: 75,
-                        lat: 51.7344,
-                        lng: 72.4231,
-                        creatorId: 'mod_1',
-                        status: 'active',
-                        isUrgent: true
-                    },
-                    {
-                        id: 'q2',
-                        title: 'Помощь пожилым',
-                        description: 'Помоги пожилым соседям с продуктами',
-                        xpReward: 200,
                         coinReward: 100,
                         lat: 51.7350,
-                        lng: 72.4240,
+                        lng: 72.4250,
                         creatorId: 'mod_1',
                         status: 'active',
-                        isUrgent: false
+                        isUrgent: true,
+                        address: 'Парк Победы'
                     },
                     {
-                        id: 'q3',
-                        title: 'Посадка деревьев',
-                        description: 'Участвуй в акции по озеленению города',
-                        xpReward: 300,
+                        id: 'q_2',
+                        title: 'Посади дерево',
+                        description: 'Участвуй в озеленении города',
+                        xpReward: 200,
                         coinReward: 150,
-                        lat: 51.7330,
-                        lng: 72.4220,
+                        lat: 51.7273,
+                        lng: 72.4163,
                         creatorId: 'mod_1',
                         status: 'active',
-                        isUrgent: false
+                        isUrgent: false,
+                        address: 'Центральная площадь'
                     }
                 ];
                 save('ekb_quests', quests);
             } else quests = load('ekb_quests');
 
-            // Загрузка пожертвований
+            // Пожертвования
             if (!localStorage.getItem('ekb_donations')) {
                 donations = [
                     {
-                        id: 'd1',
-                        title: 'Ремонт детской площадки',
-                        description: 'Сбор средств на обновление игрового оборудования',
-                        img: '🏞️',
-                        current: 250,
-                        goal: 2000
+                        id: 'd_1',
+                        title: 'Новые скамейки в парке',
+                        description: 'Собираем на установку экологичных скамеек',
+                        img: '🪑',
+                        current: 1200,
+                        goal: 5000
                     },
                     {
-                        id: 'd2',
-                        title: 'Освещение улиц',
-                        description: 'Установка новых фонарей в темных районах',
-                        img: '💡',
-                        current: 500,
+                        id: 'd_2',
+                        title: 'Урны для раздельного сбора',
+                        description: 'Установка контейнеров для переработки',
+                        img: '♻️',
+                        current: 800,
                         goal: 3000
                     }
                 ];
                 save('ekb_donations', donations);
             } else donations = load('ekb_donations');
 
-            // Загрузка магазина
+            // Магазин
             if (!localStorage.getItem('ekb_shop')) {
                 shopItems = [
-                    { id: 's_av1', name: 'Герой', type: 'avatar', emoji: '🦸', price: 200, desc: 'Супергеройский образ' },
-                    { id: 's_av2', name: 'Робот', type: 'avatar', emoji: '🤖', price: 300, desc: 'Технологичный аватар' },
-                    { id: 's_av3', name: 'Космонавт', type: 'avatar', emoji: '🧑‍🚀', price: 500, desc: 'Выше звезд' },
-                    { id: 's_av4', name: 'Дракон', type: 'avatar', emoji: '🐲', price: 1000, desc: 'Мифическая редкость' },
-                    { id: 's_bg1', name: 'Неон-Сити', type: 'background', value: 'url(https://images.unsplash.com/photo-1555680202-c86f0e12f086?q=80&w=1000&auto=format&fit=crop)', price: 800, desc: 'Киберпанк атмосфера' },
-                    { id: 's_bg2', name: 'Закат в степи', type: 'background', value: 'url(https://images.unsplash.com/photo-1513622470522-26c308a34d25?q=80&w=1000&auto=format&fit=crop)', price: 600, desc: 'Родные просторы' },
-                    { id: 's_bg3', name: 'Космос', type: 'background', value: 'url(https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=1000&auto=format&fit=crop)', price: 1200, desc: 'Глубокий космос' },
-                    { id: 's_bs1', name: 'Кольцо Усердия', type: 'boost', value: 'xp_1.5', price: 400, desc: '+50% XP на 24 часа' },
-                    { id: 's_bs2', name: 'Магнит Монет', type: 'boost', value: 'coin_2.0', price: 600, desc: 'x2 Монет на 24 часа' }
+                    // Аватары
+                    { id: 's_av1', name: 'Эко-Воин', type: 'avatar', value: 'https://picsum.photos/seed/eco1/100/100', price: 300, desc: 'Защитник природы' },
+                    { id: 's_av2', name: 'Зелёный друг', type: 'avatar', value: 'https://picsum.photos/seed/eco2/100/100', price: 250, desc: 'Любитель деревьев' },
+                    { id: 's_av3', name: 'Чистый город', type: 'avatar', value: 'https://picsum.photos/seed/eco3/100/100', price: 400, desc: 'Герой улиц' },
+                    // Фоны
+                    { id: 's_bg1', name: 'Киберпарк', type: 'background', value: 'url(https://images.unsplash.com/photo-1518622380662-f7556a58bb08?q=80&w=1000)', price: 800, desc: 'Техно-природа' },
+                    { id: 's_bg2', name: 'Зелёный оазис', type: 'background', value: 'url(https://images.unsplash.com/photo-1540206395-68808572332f?q=80&w=1000)', price: 600, desc: 'Городской сад' },
+                    { id: 's_bg3', name: 'Горный закат', type: 'background', value: 'url(https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=1000)', price: 1200, desc: 'Природа Казахстана' },
+                    { id: 's_fr1', name: 'Изумрудная рамка', type: 'frame', value: 'border-color: #34d399; box-shadow: 0 0 18px rgba(52, 211, 153, 0.35);', price: 500, desc: 'Анимированная рамка вокруг аватара' },
+                    { id: 's_fr2', name: 'Золотистая рамка', type: 'frame', value: 'border-color: #f59e0b; box-shadow: 0 0 18px rgba(245, 158, 11, 0.35);', price: 650, desc: 'Тёплая светящаяся обводка' },
+                    { id: 's_fr3', name: 'Синяя рамка', type: 'frame', value: 'border: 3px solid #3b82f6;', price: 300, desc: 'Обычная синяя рамка' },
+                    { id: 's_fr4', name: 'Красная рамка', type: 'frame', value: 'border: 3px solid #ef4444;', price: 300, desc: 'Обычная красная рамка' },
+                    { id: 's_fr5', name: 'Радужная рамка', type: 'frame', value: 'border: 3px solid; border-image: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3) 1; animation: rainbow 2s linear infinite;', price: 800, desc: 'Анимированная радужная рамка' }
+                    // Бусты
                 ];
                 save('ekb_shop', shopItems);
             } else shopItems = load('ekb_shop');
 
-            // Загрузка заявок
+            // Заявки
             if (!localStorage.getItem('ekb_submissions')) {
                 submissions = [];
                 save('ekb_submissions', submissions);
             } else submissions = load('ekb_submissions');
-
-            // Загрузка запросов
-            if (!localStorage.getItem('ekb_requests')) {
-                requests = [];
-                save('ekb_requests', requests);
-            } else requests = load('ekb_requests');
-
-            // Загрузка чата
-            if (!localStorage.getItem('ekb_chat')) {
-                chatMessages = [
-                    { userId: 'mod_1', userName: 'Модератор', text: 'Добро пожаловать в городской чат!', time: Date.now() - 3600000 }
-                ];
-                save('ekb_chat', chatMessages);
-            } else chatMessages = load('ekb_chat');
         }
 
-        // Утилиты сохранения/загрузки
+        // Утилиты
         function save(key, data) { localStorage.setItem(key, JSON.stringify(data)); }
         function load(key) { return JSON.parse(localStorage.getItem(key)); }
 
@@ -838,44 +976,10 @@
             setTimeout(() => div.remove(), 2800);
         }
 
-        // Валидация email
-        function isValidEmail(email) {
-            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return re.test(email);
-        }
-
         // ==========================================
-        // ПЕРЕКЛЮЧЕНИЕ ТЕМЫ
+        // ИГРОВАЯ ЛОГИКА
         // ==========================================
-        function toggleTheme() {
-            const body = document.body;
-            const icon = document.getElementById('themeIcon');
-            const currentTheme = body.getAttribute('data-theme');
-            
-            if (currentTheme === 'dark') {
-                body.setAttribute('data-theme', 'light');
-                icon.className = 'fas fa-sun';
-                localStorage.setItem('ekb_theme', 'light');
-            } else {
-                body.setAttribute('data-theme', 'dark');
-                icon.className = 'fas fa-moon';
-                localStorage.setItem('ekb_theme', 'dark');
-            }
-            
-            // Обновляем карту если она открыта
-            if (mapInstance && currentPage === 'map') {
-                setTimeout(() => {
-                    mapInstance.invalidateSize();
-                }, 300);
-            }
-        }
-
-        // ==========================================
-        // ИГРОВАЯ ЛОГИКА & БУСТЫ
-        // ==========================================
-        function calcLevel(xp) {
-            return Math.floor(1 + Math.sqrt(xp / 100));
-        }
+        function calcLevel(xp) { return Math.floor(1 + Math.sqrt(xp / 100)); }
 
         function getMultiplier(type) {
             if (!currentUser || !currentUser.activeBoosts) return 1;
@@ -892,10 +996,12 @@
             const user = allUsers.find(u => u.id === userId);
             if (!user) return;
 
-            let xpG = xpBase, coinG = coinBase;
+            const rewardFactor = 0.8;
+            let xpG = Math.floor(xpBase * rewardFactor);
+            let coinG = Math.floor(coinBase * rewardFactor);
+
             if (currentUser && currentUser.id === userId) {
-                xpG = Math.floor(xpBase * getMultiplier('xp'));
-                coinG = Math.floor(coinBase * getMultiplier('coin'));
+                xpG = Math.floor(xpG * getMultiplier('xp'));
             }
 
             user.xp = (user.xp || 0) + xpG;
@@ -903,16 +1009,12 @@
 
             const newLvl = calcLevel(user.xp);
             let lvlUp = false;
-            if (newLvl > user.level) {
-                user.level = newLvl;
-                lvlUp = true;
-            }
+            if (newLvl > user.level) { user.level = newLvl; lvlUp = true; }
 
             if (currentUser && currentUser.id === userId) {
                 currentUser = { ...user };
-                updateUserStats();
                 showToast(`+${xpG} XP | +${coinG} 🪙`, '🎉');
-                if (lvlUp) setTimeout(() => showToast(`Уровень повышен до ${newLvl}!`, '🔥'), 1000);
+                if (lvlUp) setTimeout(() => showToast(`Уровень ${newLvl}!`, '🔥'), 1000);
             }
             save('ekb_users', allUsers);
         }
@@ -932,20 +1034,19 @@
             save('ekb_users', allUsers);
             save('ekb_donations', donations);
 
-            updateUserStats();
-            showToast(`Вы пожертвовали ${amount}🪙`, '❤️');
+            showToast(`Пожертвовано ${amount}🪙`, '❤️');
             renderCurrentPage();
         }
 
-        // Симуляция онлайн-юзеров
+        // Симуляция онлайн-пользователей
         function simulateOnlineUsers() {
             if (onlineInterval) clearInterval(onlineInterval);
             onlineInterval = setInterval(() => {
                 let moved = false;
                 allUsers.forEach(u => {
                     if (u.id !== (currentUser?.id) && u.isOnline) {
-                        u.location.lat += (Math.random() - 0.5) * 0.002;
-                        u.location.lng += (Math.random() - 0.5) * 0.002;
+                        u.location.lat += (Math.random() - 0.5) * 0.001;
+                        u.location.lng += (Math.random() - 0.5) * 0.001;
                         moved = true;
                     }
                 });
@@ -954,22 +1055,14 @@
         }
 
         // ==========================================
-        // КАРТА LEAFLET
+        // КАРТА
         // ==========================================
         function initMap(containerId) {
-            if (mapInstance) {
-                mapInstance.remove();
-                mapInstance = null;
-            }
+            if (mapInstance) { mapInstance.remove(); mapInstance = null; }
             const center = currentUser?.location || EKIBASTUZ_COORDS;
 
-            const isDark = document.body.getAttribute('data-theme') === 'dark';
-            const tileUrl = isDark
-                ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-                : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-
             mapInstance = L.map(containerId, { zoomControl: false }).setView([center.lat, center.lng], 14);
-            L.tileLayer(tileUrl, {
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
                 attribution: '© OpenStreetMap contributors © CARTO'
             }).addTo(mapInstance);
 
@@ -983,53 +1076,83 @@
             if (!markersLayer) return;
             markersLayer.clearLayers();
 
-            // Рисуем квесты
+            // Квесты
             quests.filter(q => q.status === 'active').forEach(q => {
-                const isUrg = q.isUrgent ? 'border-color: var(--danger); background: #450a0a;' : '';
-                const html = `<div class="quest-marker" style="${isUrg}"><i class="fas fa-star" style="color:var(--accent)"></i> ${q.title.split(' ')[0]}</div>`;
-                const icon = L.divIcon({ html, className: '', iconSize: [120, 30], iconAnchor: [60, 15] });
-                const m = L.marker([q.lat, q.lng], { icon }).addTo(markersLayer);
+                const markerType = q.isUrgent ? 'urgent' : 'normal';
+                const truncated = q.title.length > 20 ? q.title.slice(0, 20) + '…' : q.title;
+                const icon = L.divIcon({
+                    html: `
+                        <div class="quest-marker ${markerType}">
+                            <i class="fas fa-${q.isUrgent ? 'star' : 'leaf'}"></i>
+                            <div class="marker-name">${truncated}</div>
+                        </div>
+                    `,
+                    className: '',
+                    iconSize: [80, 72],
+                    iconAnchor: [40, 72]
+                });
+                const marker = L.marker([q.lat, q.lng], { icon }).addTo(markersLayer);
 
-                m.bindPopup(`
-                    <h4 style="margin-bottom:5px; color:var(--primary)">${q.title}</h4>
-                    <p style="font-size:0.85rem; margin-bottom:10px;">${q.description}</p>
-                    <div class="flex-between mb-1">
-                        <span class="badge"><i class="fas fa-arrow-up"></i> ${q.xpReward} XP</span>
-                        <span class="badge"><i class="fas fa-coins"></i> ${q.coinReward}</span>
+                marker.bindPopup(`
+                    <div style="min-width: 250px; background: #111827; color: var(--text); border-radius: 18px; padding: 15px;">
+                        <h3 style="margin: 0 0 10px 0; color: var(--primary);">${q.title}</h3>
+                        <p style="margin: 0 0 10px 0; font-size: 0.9rem;">${q.description}</p>
+                        <p style="margin: 0 0 10px 0; color: var(--text-muted); font-size: 0.85rem;">
+                            <i class="fas fa-map-marker-alt"></i> ${q.address}
+                        </p>
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                            <span class="badge"><i class="fas fa-arrow-up"></i> ${q.xpReward} XP</span>
+                            <span class="badge"><i class="fas fa-coins"></i> ${q.coinReward} 🪙</span>
+                        </div>
+                        <button class="btn btn-primary" style="width: 100%; margin-bottom: 8px;" 
+                                onclick="startRouting(${q.lat}, ${q.lng})">
+                            <i class="fas fa-route"></i> Проложить маршрут
+                        </button>
+                        <button class="btn btn-accent" style="width: 100%;" 
+                                onclick="openQuestSubmit('${q.id}')">
+                            <i class="fas fa-play"></i> Взять квест
+                        </button>
                     </div>
-                    <button class="btn btn-primary" style="width:100%; padding:8px;" onclick="startRouting(${q.lat}, ${q.lng})"><i class="fas fa-route"></i> Путь</button>
-                    <button class="btn btn-outline mt-1" style="width:100%; padding:8px;" onclick="openQuestSubmit('${q.id}')"><i class="fas fa-camera"></i> Выполнить</button>
-                `);
+                `, { maxWidth: 300 });
             });
 
-            // Рисуем запросы
-            requests.filter(r => r.status === 'pending').forEach(r => {
-                const html = `<div class="quest-marker" style="border-color: var(--warning); background: #451a03;"><i class="fas fa-exclamation-triangle" style="color:var(--warning)"></i> Запрос</div>`;
-                const icon = L.divIcon({ html, className: '', iconSize: [120, 30], iconAnchor: [60, 15] });
-                const m = L.marker([r.lat, r.lng], { icon }).addTo(markersLayer);
-
-                m.bindPopup(`
-                    <h4 style="margin-bottom:5px; color:var(--warning)">${r.title}</h4>
-                    <p style="font-size:0.85rem; margin-bottom:10px;">${r.description}</p>
-                    ${r.photo ? `<img src="${r.photo}" class="photo-preview" style="max-width: 200px;">` : ''}
-                    <p style="font-size:0.75rem; color:var(--text-muted); margin-top:5px;">Автор: ${r.userName}</p>
-                `);
-            });
-
-            // Рисуем других пользователей
+            // Пользователи
             allUsers.forEach(u => {
                 if (u.isOnline && u.id !== currentUser?.id) {
-                    const html = `<div class="user-marker" style="font-size: 2rem;">${u.avatar}</div>`;
-                    const m = L.marker([u.location.lat, u.location.lng], { icon: L.divIcon({ html, className: '' }) }).addTo(markersLayer);
-                    m.bindPopup(`<b>${u.name}</b><br>Уровень: ${u.level}`);
+                    const userIcon = L.divIcon({
+                        html: `
+                            <div class="user-pin" onclick="showMiniProfile('${u.id}')">
+                                <div class="user-pin-name">${u.name}</div>
+                                <div class="user-marker">
+                                    <img src="${u.avatar}" alt="${u.name}">
+                                </div>
+                            </div>
+                        `,
+                        className: '',
+                        iconSize: [80, 90],
+                        iconAnchor: [40, 50]
+                    });
+                    L.marker([u.location.lat, u.location.lng], { icon: userIcon }).addTo(markersLayer);
                 }
             });
 
-            // Рисуем себя
+            // Текущий пользователь
             if (currentUser) {
-                const html = `<div class="user-marker" style="font-size: 2.5rem; filter: drop-shadow(0 0 10px var(--primary));">${currentUser.avatar}</div>`;
-                const m = L.marker([currentUser.location.lat, currentUser.location.lng], { icon: L.divIcon({ html, className: '' }) }).addTo(markersLayer);
-                m.bindPopup(`<b>Ты здесь</b>`);
+                const currentUserStyle = currentUser.frame || 'border-color: var(--accent); box-shadow: 0 0 20px rgba(245, 158, 11, 0.5);';
+                const myIcon = L.divIcon({
+                    html: `
+                        <div class="user-pin">
+                            <div class="user-pin-name">Вы здесь</div>
+                            <div class="user-marker" style="${currentUserStyle}">
+                                <img src="${currentUser.avatar}" alt="${currentUser.name}">
+                            </div>
+                        </div>
+                    `,
+                    className: '',
+                    iconSize: [80, 90],
+                    iconAnchor: [40, 50]
+                });
+                L.marker([currentUser.location.lat, currentUser.location.lng], { icon: myIcon }).addTo(markersLayer);
             }
         }
 
@@ -1038,12 +1161,16 @@
             if (routingControl) mapInstance.removeControl(routingControl);
 
             routingControl = L.Routing.control({
-                waypoints: [L.latLng(currentUser.location.lat, currentUser.location.lng), L.latLng(lat, lng)],
+                waypoints: [
+                    L.latLng(currentUser.location.lat, currentUser.location.lng),
+                    L.latLng(lat, lng)
+                ],
                 routeWhileDragging: false,
                 addWaypoints: false,
                 fitSelectedRoutes: true,
                 lineOptions: { styles: [{ color: '#10b981', weight: 6, opacity: 0.8 }] },
-                show: false
+                show: false,
+                createMarker: () => null
             }).addTo(mapInstance);
             mapInstance.closePopup();
         }
@@ -1069,39 +1196,121 @@
         }
 
         // ==========================================
+        // МИНИ-ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ
+        // ==========================================
+        window.showMiniProfile = (userId) => {
+            const user = allUsers.find(u => u.id === userId);
+            if (!user) return;
+
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
+                <div class="mini-profile">
+                    <div class="mini-profile-header">
+                        <div class="mini-profile-avatar">
+                            <img src="${user.avatar}" alt="${user.name}">
+                        </div>
+                        <div class="mini-profile-info">
+                            <h3>${user.name}</h3>
+                            <span class="badge">Уровень ${user.level}</span>
+                            <span class="badge">${user.points} 🪙</span>
+                        </div>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <p style="color: var(--text-muted); margin-bottom: 0.5rem;">
+                            <i class="fas fa-tasks"></i> Выполнено квестов: ${user.completedQuests?.length || 0}
+                        </p>
+                        <p style="color: var(--text-muted);">
+                            <i class="fas fa-star"></i> Опыт: ${user.xp} XP
+                        </p>
+                    </div>
+                    <button class="btn btn-outline" style="width: 100%; margin-top: 1rem;" 
+                            onclick="this.closest('.modal-overlay').remove()">
+                        Закрыть
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        // ==========================================
         // РЕНДЕР СТРАНИЦ
         // ==========================================
         function renderMap() {
             const root = document.getElementById('appRoot');
             root.innerHTML = `
-                <div class="card" style="padding:1rem;">
+                <div class="card" style="padding: 1rem;">
                     <div class="flex-between mb-1">
-                        <h3><i class="fas fa-map-marked-alt text-primary"></i> Экибастуз</h3>
+                        <h3><i class="fas fa-map-marked-alt text-primary"></i> Карта Экибастуза</h3>
                         <div>
-                            <button class="btn btn-outline" style="padding:8px 12px;" onclick="updateGeo()"><i class="fas fa-crosshairs"></i></button>
-                            ${(currentUser?.role === 'moderator' || currentUser?.role === 'creator') ? `<button class="btn btn-primary" style="padding:8px 12px;" onclick="createNewQuest()"><i class="fas fa-plus"></i> Квест</button>` : ''}
+                            <button class="btn btn-outline" style="padding: 8px 12px;" onclick="updateGeo()">
+                                <i class="fas fa-crosshairs"></i>
+                            </button>
+                            ${currentUser ?
+                    `<button class="btn btn-primary" style="padding: 8px 12px; margin-left: 8px;" 
+                                         onclick="createNewQuest()">
+                                    <i class="fas fa-plus"></i> Создать квест
+                                </button>` : ''}
                         </div>
                     </div>
                     <div id="mainMap" class="map-container"></div>
                 </div>
                 
-                <h3 class="mb-1">⚡ Срочные задания</h3>
-                <div id="urgentQuestsList"></div>
+                <div class="grid-2" style="gap: 1rem;">
+                    <div class="card">
+                        <h3>⚡ Срочные задания</h3>
+                        <div id="urgentQuestsList"></div>
+                    </div>
+                    <div class="card">
+                        <h3>🍃 Обычные задания</h3>
+                        <div id="normalQuestsList"></div>
+                    </div>
+                </div>
             `;
 
             setTimeout(() => initMap('mainMap'), 100);
 
             const urgent = quests.filter(q => q.status === 'active' && q.isUrgent);
+            const normal = quests.filter(q => q.status === 'active' && !q.isUrgent);
+
             const uList = document.getElementById('urgentQuestsList');
-            if (urgent.length === 0) uList.innerHTML = '<p class="text-muted">Сейчас нет срочных заданий.</p>';
-            else {
+            if (urgent.length === 0) {
+                uList.innerHTML = '<p class="text-muted">Сейчас нет срочных заданий.</p>';
+            } else {
                 uList.innerHTML = urgent.map(q => `
                     <div class="list-item urgent flex-between">
                         <div>
-                            <h4 style="color:var(--danger)">${q.title}</h4>
-                            <div class="badge mt-1">${q.xpReward} XP | ${q.coinReward} 🪙</div>
+                            <h4 style="color: var(--danger); margin-bottom: 8px;">${q.title}</h4>
+                            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 8px;">
+                                <i class="fas fa-map-marker-alt"></i> ${q.address}
+                            </p>
+                            <div style="display: flex; gap: 8px;">
+                                <span class="badge"><i class="fas fa-arrow-up"></i> ${q.xpReward} XP</span>
+                                <span class="badge"><i class="fas fa-coins"></i> ${q.coinReward} 🪙</span>
+                            </div>
                         </div>
                         <button class="btn btn-danger" onclick="openQuestSubmit('${q.id}')">Взять</button>
+                    </div>
+                `).join('');
+            }
+
+            const nList = document.getElementById('normalQuestsList');
+            if (normal.length === 0) {
+                nList.innerHTML = '<p class="text-muted">Сейчас нет обычных заданий.</p>';
+            } else {
+                nList.innerHTML = normal.map(q => `
+                    <div class="list-item flex-between">
+                        <div>
+                            <h4 style="margin-bottom: 8px;">${q.title}</h4>
+                            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 8px;">
+                                <i class="fas fa-map-marker-alt"></i> ${q.address}
+                            </p>
+                            <div style="display: flex; gap: 8px;">
+                                <span class="badge"><i class="fas fa-arrow-up"></i> ${q.xpReward} XP</span>
+                                <span class="badge"><i class="fas fa-coins"></i> ${q.coinReward} 🪙</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-secondary" onclick="openQuestSubmit('${q.id}')">Взять</button>
                     </div>
                 `).join('');
             }
@@ -1118,8 +1327,11 @@
                     ${activeQs.map(q => `
                         <div class="card" style="border-left: 5px solid ${q.isUrgent ? 'var(--danger)' : 'var(--primary)'}">
                             <h3>${q.title}</h3>
-                            <p class="text-muted mt-1" style="font-size:0.9rem;">${q.description}</p>
-                            <div class="flex-between mt-1" style="margin-top:1.5rem;">
+                            <p class="text-muted mt-1" style="font-size: 0.9rem;">${q.description}</p>
+                            <p class="text-muted" style="font-size: 0.85rem; margin-top: 8px;">
+                                <i class="fas fa-map-marker-alt"></i> ${q.address}
+                            </p>
+                            <div class="flex-between mt-1" style="margin-top: 1.5rem;">
                                 <div>
                                     <span class="badge"><i class="fas fa-star"></i> ${q.xpReward}</span>
                                     <span class="badge"><i class="fas fa-coins"></i> ${q.coinReward}</span>
@@ -1132,74 +1344,38 @@
             `;
         }
 
-        function renderRequests() {
+        function renderDonations() {
             const root = document.getElementById('appRoot');
-            const pendingReqs = requests.filter(r => r.status === 'pending');
-
             root.innerHTML = `
-                <div class="flex-between mb-1">
-                    <h2><i class="fas fa-exclamation-triangle"></i> Запросы жителей</h2>
-                    ${currentUser ? `<button class="btn btn-primary" onclick="openNewRequest()"><i class="fas fa-plus"></i> Новый запрос</button>` : ''}
-                </div>
-                <p class="text-muted mb-1">Сообщайте о проблемах в городе.</p>
-                
-                ${pendingReqs.length === 0 ? '<p class="text-muted">Нет активных запросов.</p>' : ''}
-                ${pendingReqs.map(r => `
-                    <div class="card request-card">
-                        <div class="flex-between mb-1">
-                            <h3>${r.title}</h3>
-                            <span class="badge" style="background: var(--warning)">${r.category}</span>
-                        </div>
-                        <p class="text-muted">${r.description}</p>
-                        ${r.photo ? `<img src="${r.photo}" class="photo-preview">` : ''}
-                        <div class="flex-between mt-1">
-                            <span class="text-muted" style="font-size:0.85rem;">Автор: ${r.userName}</span>
-                            ${currentUser?.role === 'moderator' ? `
-                                <div>
-                                    <button class="btn btn-primary" style="padding:6px 12px;" onclick="approveRequest('${r.id}')">Одобрить</button>
-                                    <button class="btn btn-outline" style="padding:6px 12px; margin-left:5px;" onclick="rejectRequest('${r.id}')">Отклонить</button>
+                <h2><i class="fas fa-hands-helping"></i> Пожертвования</h2>
+                <p class="text-muted mb-1">Пожертвуй монеты на улучшение города.</p>
+                ${donations.map(d => {
+                const percent = Math.min(100, Math.floor((d.current / d.goal) * 100));
+                return `
+                        <div class="card">
+                            <div class="flex-between">
+                                <div style="font-size: 3rem;">${d.img}</div>
+                                <div style="flex: 1; margin-left: 1rem;">
+                                    <h3>${d.title}</h3>
+                                    <p class="text-muted" style="font-size: 0.85rem; margin-top: 5px;">${d.description}</p>
                                 </div>
-                            ` : ''}
-                        </div>
-                    </div>
-                `).join('')}
-            `;
-        }
-
-        function renderChat() {
-            const root = document.getElementById('appRoot');
-            
-            root.innerHTML = `
-                <h2><i class="fas fa-comments"></i> Городской чат</h2>
-                <div class="chat-container">
-                    <div class="chat-messages" id="chatMessages">
-                        ${chatMessages.slice(-50).map(msg => `
-                            <div class="chat-message">
-                                <div class="chat-header">${msg.userName}</div>
-                                <div class="chat-text">${msg.text}</div>
                             </div>
-                        `).join('')}
-                    </div>
-                    ${currentUser ? `
-                        <div class="chat-input-container">
-                            <input type="text" id="chatInput" class="chat-input" placeholder="Напишите сообщение..." maxlength="200">
-                            <button class="btn btn-primary" onclick="sendChatMessage()"><i class="fas fa-paper-plane"></i></button>
+                            <div class="progress-container">
+                                <div class="progress-fill donation-fill" style="width: ${percent}%"></div>
+                            </div>
+                            <div class="flex-between" style="font-size: 0.85rem; font-weight: bold;">
+                                <span>Собрано: ${d.current} 🪙</span>
+                                <span>Цель: ${d.goal} 🪙</span>
+                            </div>
+                            <div class="grid-2 mt-1">
+                                <button class="btn btn-outline" onclick="donate('${d.id}', 50)">50 🪙</button>
+                                <button class="btn btn-outline" onclick="donate('${d.id}', 100)">100 🪙</button>
+                                <button class="btn btn-secondary" style="grid-column: 1 / -1;" onclick="donate('${d.id}', 500)">500 🪙</button>
+                            </div>
                         </div>
-                    ` : '<p class="text-muted text-center">Войдите чтобы участвовать в чате</p>'}
-                </div>
+                    `;
+            }).join('')}
             `;
-            
-            // Прокрутка к последнему сообщению
-            const chatDiv = document.getElementById('chatMessages');
-            if (chatDiv) chatDiv.scrollTop = chatDiv.scrollHeight;
-            
-            // Обработка Enter
-            const input = document.getElementById('chatInput');
-            if (input) {
-                input.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') sendChatMessage();
-                });
-            }
         }
 
         function renderShop() {
@@ -1208,39 +1384,58 @@
             const root = document.getElementById('appRoot');
             root.innerHTML = `
                 <div class="flex-between mb-1">
-                    <h2><i class="fas fa-store"></i> Лавка редкостей</h2>
-                    <div class="badge" style="font-size:1rem;"><i class="fas fa-coins"></i> ${currentUser.points}</div>
+                    <h2><i class="fas fa-store"></i> Магазин</h2>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <div class="badge" style="font-size: 1rem;"><i class="fas fa-coins"></i> ${currentUser.points}</div>
+                        <button class="btn btn-outline" style="padding: 8px 10px; height: 38px;" onclick="showBuyCoinsModal()">+</button>
+                    </div>
                 </div>
                 
                 <div class="tabs">
-                    <button class="tab-btn ${currentShopTab === 'avatars' ? 'active' : ''}" onclick="currentShopTab='avatars'; renderShop()">Аватары</button>
-                    <button class="tab-btn ${currentShopTab === 'backgrounds' ? 'active' : ''}" onclick="currentShopTab='backgrounds'; renderShop()">Фоны профиля</button>
-                    <button class="tab-btn ${currentShopTab === 'boosts' ? 'active' : ''}" onclick="currentShopTab='boosts'; renderShop()">Бусты</button>
+                    <button class="tab-btn ${currentShopTab === 'avatars' ? 'active' : ''}" 
+                            onclick="currentShopTab='avatars'; renderShop()">Аватары</button>
+                    <button class="tab-btn ${currentShopTab === 'backgrounds' ? 'active' : ''}" 
+                            onclick="currentShopTab='backgrounds'; renderShop()">Фоны</button>
+                    <button class="tab-btn ${currentShopTab === 'frames' ? 'active' : ''}" 
+                            onclick="currentShopTab='frames'; renderShop()">Рамки</button>
+                    <button class="tab-btn ${currentShopTab === 'boosts' ? 'active' : ''}" 
+                            onclick="currentShopTab='boosts'; renderShop()">Бусты</button>
                 </div>
                 
                 <div class="shop-grid">
-                    ${shopItems.filter(i => i.type === (currentShopTab === 'backgrounds' ? 'background' : currentShopTab === 'boosts' ? 'boost' : 'avatar')).map(item => {
-                        const hasItem = currentUser.inventory.includes(item.id);
-                        let btnHtml = '';
-                        if (item.type === 'boost') {
-                            btnHtml = `<button class="btn btn-accent" style="width:100%; padding:8px;" onclick="buyItem('${item.id}')">${item.price} 🪙</button>`;
-                        } else {
-                            btnHtml = hasItem
-                                ? `<button class="btn btn-outline" style="width:100%; padding:8px; border-color:var(--success); color:var(--success)" onclick="equipItem('${item.id}')">Экипировать</button>`
-                                : `<button class="btn btn-primary" style="width:100%; padding:8px;" onclick="buyItem('${item.id}')">${item.price} 🪙</button>`;
-                        }
+                    ${shopItems.filter(i => i.type === (currentShopTab === 'backgrounds' ? 'background' :
+                currentShopTab === 'frames' ? 'frame' :
+                currentShopTab === 'boosts' ? 'boost' : 'avatar')).map(item => {
+                    const hasItem = currentUser.inventory.includes(item.id);
+                    let btnHtml = '';
+                    if (item.type === 'boost') {
+                        btnHtml = `<button class="btn btn-accent" style="width: 100%; padding: 8px;" 
+                                             onclick="buyItem('${item.id}')">${item.price} 🪙</button>`;
+                    } else {
+                        btnHtml = hasItem
+                            ? `<button class="btn btn-outline" style="width: 100%; padding: 8px; 
+                                                 border-color: var(--success); color: var(--success)" 
+                                         onclick="equipItem('${item.id}')">Экипировать</button>`
+                            : `<button class="btn btn-primary" style="width: 100%; padding: 8px;" 
+                                         onclick="buyItem('${item.id}')">${item.price} 🪙</button>`;
+                    }
 
-                        return `
+                    return `
                             <div class="shop-card">
-                                <div class="preview" ${item.type === 'background' ? `style="background: ${item.value}; background-size:cover; border-radius:12px;"` : ''}>
-                                    ${item.type === 'avatar' ? item.emoji : item.type === 'boost' ? '⚡' : ''}
+                                <div class="preview" ${item.type === 'background' ?
+                            `style="background: ${item.value}; background-size: cover; border-radius: 12px;"` : ''}>
+                                    ${item.type === 'avatar' ?
+                            `<img src="${item.value}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;">` :
+                            item.type === 'frame' ?
+                            `<div style="width: 100%; height: 100%; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--text); background: rgba(255,255,255,0.08); ${item.value}">☆</div>` :
+                            item.type === 'boost' ? '⚡' : ''}
                                 </div>
-                                <h4 style="font-size:0.9rem;">${item.name}</h4>
-                                <p class="text-muted mb-1" style="font-size:0.75rem;">${item.desc}</p>
+                                <h4 style="font-size: 0.9rem;">${item.name}</h4>
+                                <p class="text-muted mb-1" style="font-size: 0.75rem;">${item.desc}</p>
                                 ${btnHtml}
                             </div>
                         `;
-                    }).join('')}
+                }).join('')}
                 </div>
             `;
         }
@@ -1256,20 +1451,23 @@
             let boostHtml = '';
             if (currentUser.activeBoosts && currentUser.activeBoosts.length > 0) {
                 boostHtml = `
-                    <div class="card" style="border:1px solid var(--accent)">
-                        <h4><i class="fas fa-bolt" style="color:var(--accent)"></i> Активные бусты</h4>
-                        ${currentUser.activeBoosts.map(b => `<div class="badge mt-1">${b.type.replace('_', ' x')} (до ${new Date(b.expires).toLocaleTimeString()})</div>`).join('')}
+                    <div class="card" style="border: 1px solid var(--accent);">
+                        <h4><i class="fas fa-bolt" style="color: var(--accent);"></i> Активные бусты</h4>
+                        ${currentUser.activeBoosts.map(b =>
+                    `<div class="badge mt-1">${b.type.replace('_', ' x')} (до ${new Date(b.expires).toLocaleTimeString()})</div>`
+                ).join('')}
                     </div>
                 `;
             }
 
             root.innerHTML = `
-                <div class="profile-header" style="background-image: ${currentUser.background || 'none'}; background-color: var(--surface-light);">
-                    <button class="edit-profile-btn" onclick="openEditProfile()"><i class="fas fa-edit"></i></button>
+                <div class="profile-header" style="background-image: ${currentUser.background || 'none'};">
                     <div class="profile-content">
-                        <div class="avatar-lg">${currentUser.avatar}</div>
+                        <div class="avatar-lg" style="${currentUser.frame || ''}">
+                            <img src="${currentUser.avatar}" alt="${currentUser.name}">
+                        </div>
                         <h2 class="mt-1">${currentUser.name}</h2>
-                        <p class="text-muted">${currentUser.role === 'moderator' ? '👑 Модератор' : 'Волонтёр Экибастуза'}</p>
+                        <p class="text-muted">${currentUser.role === 'moderator' ? '👑 Модератор' : 'Эко-волонтёр'}</p>
                     </div>
                 </div>
 
@@ -1284,73 +1482,90 @@
                     
                     <div class="grid-2 mt-1">
                         <div class="stat-box">
-                            <i class="fas fa-coins text-accent"></i>
+                            <i class="fas fa-coins text-accent" style="font-size: 1.5rem;"></i>
                             <h4>${currentUser.points}</h4>
-                            <span class="text-muted" style="font-size:0.8rem">Монет</span>
+                            <span class="text-muted" style="font-size: 0.8rem">Монет</span>
                         </div>
                         <div class="stat-box">
-                            <i class="fas fa-check-circle text-primary"></i>
+                            <i class="fas fa-check-circle text-primary" style="font-size: 1.5rem;"></i>
                             <h4>${currentUser.completedQuests?.length || 0}</h4>
-                            <span class="text-muted" style="font-size:0.8rem">Квестов</span>
+                            <span class="text-muted" style="font-size: 0.8rem">Квестов</span>
                         </div>
                     </div>
                 </div>
 
                 ${boostHtml}
 
-                <button class="btn btn-danger" style="width:100%" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Выйти из аккаунта</button>
+                <button class="btn btn-danger" style="width: 100%;" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Выйти
+                </button>
             `;
         }
 
         function renderMod() {
             if (!currentUser || currentUser.role !== 'moderator') return;
             const root = document.getElementById('appRoot');
-            const pends = submissions.filter(s => s.status === 'pending');
-            const reqPends = requests.filter(r => r.status === 'pending');
+
+            const pendingSubs = submissions.filter(s => s.status === 'pending');
+            const pendingQuests = quests.filter(q => q.status === 'pending');
 
             root.innerHTML = `
                 <h2><i class="fas fa-shield-alt"></i> Панель Модератора</h2>
                 
                 <div class="card">
-                    <h3>Заявки на выполнение квестов (${pends.length})</h3>
-                    ${pends.length === 0 ? '<p class="text-muted">Нет заявок на проверку.</p>' : ''}
-                    ${pends.map(sub => {
+                    <h3>📋 Заявки на выполнение (${pendingSubs.length})</h3>
+                    ${pendingSubs.length === 0 ?
+                    '<p class="text-muted">Нет заявок на проверку.</p>' :
+                    pendingSubs.map(sub => {
                         const q = quests.find(x => x.id === sub.questId);
                         return `
-                            <div class="card" style="margin-top: 1rem;">
-                                <div class="flex-between mb-1">
-                                    <b>👤 ${sub.userName}</b>
-                                    <span class="badge">Квест: ${q?.title || 'Удален'}</span>
+                                <div class="list-item" style="margin-top: 1rem;">
+                                    <div class="flex-between mb-1">
+                                        <b>👤 ${sub.userName}</b>
+                                        <span class="badge">Квест: ${q?.title || 'Удален'}</span>
+                                    </div>
+                                    <p class="mb-1"><i>"${sub.comment}"</i></p>
+                                    <div class="grid-2">
+                                        <button class="btn btn-primary" onclick="resolveSub('${sub.id}', true)">
+                                            <i class="fas fa-check"></i> Одобрить
+                                        </button>
+                                        <button class="btn btn-outline" style="color: var(--danger); border-color: var(--danger);" 
+                                                onclick="resolveSub('${sub.id}', false)">
+                                            <i class="fas fa-times"></i> Отклонить
+                                        </button>
+                                    </div>
                                 </div>
-                                <p class="mb-1"><i>"${sub.comment}"</i></p>
-                                ${sub.photo ? `<img src="${sub.photo}" class="photo-preview">` : ''}
-                                <div class="grid-2">
-                                    <button class="btn btn-primary" onclick="resolveSub('${sub.id}', true)"><i class="fas fa-check"></i> Одобрить</button>
-                                    <button class="btn btn-outline" style="color:var(--danger); border-color:var(--danger)" onclick="resolveSub('${sub.id}', false)"><i class="fas fa-times"></i> Отклонить</button>
-                                </div>
-                            </div>
-                        `;
-                    }).join('')}
+                            `;
+                    }).join('')
+                }
                 </div>
 
-                <div class="card" style="margin-top: 1rem;">
-                    <h3>Запросы на создание заданий (${reqPends.length})</h3>
-                    ${reqPends.length === 0 ? '<p class="text-muted">Нет новых запросов.</p>' : ''}
-                    ${reqPends.map(req => `
-                        <div class="card" style="margin-top: 1rem;">
-                            <div class="flex-between mb-1">
-                                <b>${req.title}</b>
-                                <span class="badge" style="background: var(--warning)">${req.category}</span>
+                <div class="card">
+                    <h3>🆕 Новые квесты на модерацию (${pendingQuests.length})</h3>
+                    ${pendingQuests.length === 0 ?
+                    '<p class="text-muted">Нет новых квестов.</p>' :
+                    pendingQuests.map(q => `
+                            <div class="list-item" style="margin-top: 1rem;">
+                                <h4>${q.title}</h4>
+                                <p class="text-muted">${q.description}</p>
+                                <p class="text-muted" style="font-size: 0.85rem;">
+                                    <i class="fas fa-map-marker-alt"></i> ${q.address}
+                                </p>
+                                <div style="display: flex; gap: 8px; margin: 8px 0;">
+                                    <span class="badge">XP: ${q.xpReward}</span>
+                                    <span class="badge">🪙: ${q.coinReward}</span>
+                                </div>
+                                <div class="grid-2">
+                                    <button class="btn btn-primary" onclick="approveQuest('${q.id}')">
+                                        <i class="fas fa-check"></i> Одобрить
+                                    </button>
+                                    <button class="btn btn-outline" onclick="editQuest('${q.id}')">
+                                        <i class="fas fa-edit"></i> Изменить
+                                    </button>
+                                </div>
                             </div>
-                            <p class="text-muted">${req.description}</p>
-                            ${req.photo ? `<img src="${req.photo}" class="photo-preview">` : ''}
-                            <p class="text-muted" style="font-size:0.85rem;">Автор: ${req.userName}</p>
-                            <div class="grid-2">
-                                <button class="btn btn-primary" onclick="approveRequest('${req.id}')"><i class="fas fa-check"></i> Создать квест</button>
-                                <button class="btn btn-outline" style="color:var(--danger); border-color:var(--danger)" onclick="rejectRequest('${req.id}')"><i class="fas fa-times"></i> Отклонить</button>
-                            </div>
-                        </div>
-                    `).join('')}
+                        `).join('')
+                }
                 </div>
             `;
         }
@@ -1361,7 +1576,7 @@
         function buyItem(id) {
             const item = shopItems.find(i => i.id === id);
             if (!item) return;
-            if (currentUser.points < item.price) return showToast('Не хватает монет!', '💸');
+            if (currentUser.points < item.price) return showToast('Недостаточно монет!', '💸');
 
             currentUser.points -= item.price;
 
@@ -1377,16 +1592,57 @@
             }
 
             syncCurrentUser();
-            updateUserStats();
             renderShop();
         }
 
         function equipItem(id) {
             const item = shopItems.find(i => i.id === id);
-            if (item.type === 'avatar') currentUser.avatar = item.emoji;
+            if (!item) return;
+            if (item.type === 'avatar') currentUser.avatar = item.value;
             if (item.type === 'background') currentUser.background = item.value;
+            if (item.type === 'frame') currentUser.frame = item.value;
             syncCurrentUser();
             showToast('Экипировано', '✨');
+        }
+
+        function showBuyCoinsModal() {
+            if (!currentUser) return showToast('Сначала войдите', '❌');
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
+                <div class="modal-card">
+                    <h3 class="mb-1">Пополнить монеты</h3>
+                    <p class="text-muted mb-1">Выберите пакет монет.</p>
+                    <div style="margin-bottom: 1rem;">
+                        <button class="btn btn-primary" style="width: 100%; margin-bottom: 0.5rem;" onclick="buyCoins(100, 1000)">100 🪙 за 1000₸</button>
+                        <button class="btn btn-primary" style="width: 100%; margin-bottom: 0.5rem;" onclick="buyCoins(200, 2000)">200 🪙 за 2000₸</button>
+                        <button class="btn btn-primary" style="width: 100%; margin-bottom: 0.5rem;" onclick="buyCoins(1000, 10000)">1000 🪙 за 10000₸</button>
+                    </div>
+                    <input type="text" id="cardNumber" placeholder="Номер карты Visa (пример: 4111 1111 1111 1111)" style="margin-bottom: 0.75rem;">
+                    <div class="grid-2">
+                        <button class="btn btn-outline" onclick="this.closest('.modal-overlay').remove()">Отмена</button>
+                        <button class="btn btn-success" id="confirmBuyBtn">Купить</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            modal.querySelector('#confirmBuyBtn').onclick = () => {
+                const card = modal.querySelector('#cardNumber').value.trim();
+                if (!card) return showToast('Введите номер карты', '⚠️');
+                // Имитация, не сохраняем данные
+                showToast('Покупка имитирована, монеты добавлены', '💰');
+                document.querySelector('.modal-overlay').remove();
+            };
+        }
+
+        function buyCoins(amount, price) {
+            if (!currentUser) return;
+            currentUser.points += amount;
+            syncCurrentUser();
+            showToast(`Получено ${amount} 🪙`, '💰');
+            document.querySelector('.modal-overlay').remove();
+            renderCurrentPage();
         }
 
         function syncCurrentUser() {
@@ -1394,18 +1650,6 @@
             if (dbU) {
                 Object.assign(dbU, currentUser);
                 save('ekb_users', allUsers);
-            }
-        }
-
-        function updateUserStats() {
-            if (currentUser) {
-                document.getElementById('userStats').style.display = 'flex';
-                document.getElementById('userLevel').style.display = 'flex';
-                document.getElementById('userCoins').textContent = currentUser.points;
-                document.getElementById('userLvl').textContent = currentUser.level;
-            } else {
-                document.getElementById('userStats').style.display = 'none';
-                document.getElementById('userLevel').style.display = 'none';
             }
         }
 
@@ -1418,14 +1662,16 @@
             modal.innerHTML = `
                 <div class="modal-card">
                     <h3 class="mb-1">${q.title}</h3>
-                    <p class="text-muted mb-1">Опиши, что было сделано, и прикрепи фото.</p>
-                    <textarea id="subComment" rows="3" placeholder="Я убрал весь мусор..."></textarea>
-                    <div class="photo-upload-btn" onclick="document.getElementById('photoInput').click()">
-                        <i class="fas fa-camera" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
-                        <p>Нажмите чтобы загрузить фото</p>
+                    <p class="text-muted mb-1">Опиши выполнение задания</p>
+                    <textarea id="subComment" rows="3" maxlength="220" placeholder="Я убрал весь мусор..."></textarea>
+                    <div style="display: flex; gap: 0.5rem; align-items: center; margin: 0.75rem 0;">
+                        <button class="btn btn-outline" style="flex: 1;" onclick="document.getElementById('subPhoto').click()">
+                            <i class="fas fa-camera"></i> Добавить фото
+                        </button>
+                        <span id="subPhotoLabel" class="text-muted" style="font-size:0.85rem;">Фото не выбрано</span>
                     </div>
-                    <input type="file" id="photoInput" accept="image/*" style="display: none;" onchange="handlePhotoUpload(event)">
-                    <img id="photoPreview" class="photo-preview" style="display: none;">
+                    <input type="file" id="subPhoto" accept="image/*" style="display:none;">
+                    <div id="subPhotoPreview" style="display:none; margin-bottom: 0.75rem;"></div>
                     <div class="grid-2">
                         <button class="btn btn-outline" onclick="this.closest('.modal-overlay').remove()">Отмена</button>
                         <button class="btn btn-primary" id="sendSubBtn">Отправить</button>
@@ -1434,41 +1680,57 @@
             `;
             document.body.appendChild(modal);
 
-            modal.querySelector('#sendSubBtn').onclick = () => {
-                const comment = modal.querySelector('#subComment').value;
-                const photo = modal.querySelector('#photoPreview').src;
-                if (!comment) return showToast('Добавь описание!', '⚠️');
-                if (!photo || photo === '') return showToast('Прикрепите фото!', '⚠️');
+            const photoInput = modal.querySelector('#subPhoto');
+            const photoLabel = modal.querySelector('#subPhotoLabel');
+            const photoPreview = modal.querySelector('#subPhotoPreview');
 
-                submissions.push({
-                    id: 'sub_' + Date.now(),
-                    questId: qId,
-                    userId: currentUser.id,
-                    userName: currentUser.name,
-                    comment,
-                    photo,
-                    status: 'pending',
-                    time: Date.now()
-                });
-                save('ekb_submissions', submissions);
-
-                showToast('Отправлено на проверку', '✅');
-                modal.remove();
-            };
-        };
-
-        window.handlePhotoUpload = (event) => {
-            const file = event.target.files[0];
-            if (file) {
+            photoInput.addEventListener('change', () => {
+                const file = photoInput.files[0];
+                if (!file) {
+                    photoLabel.textContent = 'Фото не выбрано';
+                    photoPreview.style.display = 'none';
+                    photoPreview.innerHTML = '';
+                    return;
+                }
+                photoLabel.textContent = file.name;
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    const preview = document.getElementById('photoPreview');
-                    preview.src = e.target.result;
-                    preview.style.display = 'block';
+                reader.onload = () => {
+                    photoPreview.style.display = 'block';
+                    photoPreview.innerHTML = `<img src="${reader.result}" alt="Фото" style="width:100%; border-radius: 12px; max-height: 120px; object-fit: cover;">`;
                 };
                 reader.readAsDataURL(file);
-            }
-        };
+            });
+
+            modal.querySelector('#sendSubBtn').onclick = () => {
+                const comment = modal.querySelector('#subComment').value.trim();
+                if (!comment) return showToast('Добавь описание!', '⚠️');
+
+                const file = photoInput.files[0];
+                const sendSubmission = (photoData) => {
+                    submissions.push({
+                        id: 'sub_' + Date.now(),
+                        questId: qId,
+                        userId: currentUser.id,
+                        userName: currentUser.name,
+                        comment,
+                        photo: photoData || '',
+                        status: 'pending',
+                        time: Date.now()
+                    });
+                    save('ekb_submissions', submissions);
+                    showToast('Отправлено на проверку', '✅');
+                    modal.remove();
+                };
+
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = () => sendSubmission(reader.result);
+                    reader.readAsDataURL(file);
+                } else {
+                    sendSubmission('');
+                }
+            };
+        }
 
         window.resolveSub = (subId, isApproved) => {
             const sub = submissions.find(s => s.id === subId);
@@ -1491,207 +1753,184 @@
             }
             showToast(isApproved ? 'Одобрено' : 'Отклонено');
             renderMod();
-        };
+        }
 
         window.createNewQuest = () => {
-            const center = mapInstance.getCenter();
-            const title = prompt('Название задания (например: Очистка двора)');
-            if (!title) return;
-            const desc = prompt('Описание задачи:');
-            quests.push({
-                id: 'q_' + Date.now(),
-                title,
-                description: desc,
-                xpReward: 100,
-                coinReward: 50,
-                lat: center.lat,
-                lng: center.lng,
-                creatorId: currentUser.id,
-                status: 'active',
-                isUrgent: false
-            });
-            save('ekb_quests', quests);
-            showToast('Задание добавлено на карту!', '📍');
-            refreshMapMarkers();
-        };
-
-        // Чат
-        function sendChatMessage() {
-            const input = document.getElementById('chatInput');
-            const text = input.value.trim();
-            
-            if (!text) return;
-            
-            const now = Date.now();
-            if (now - lastChatTime < 60000) {
-                const remaining = Math.ceil((60000 - (now - lastChatTime)) / 1000);
-                return showToast(`Подождите ${remaining} секунд`, '⏱️');
+            if (!mapInstance) return showToast('Открой карту и попробуй снова', '⚠️');
+            newQuestLocation = null;
+            if (newQuestTempMarker) {
+                markersLayer.removeLayer(newQuestTempMarker);
+                newQuestTempMarker = null;
             }
-            
-            lastChatTime = now;
-            
-            chatMessages.push({
-                userId: currentUser.id,
-                userName: currentUser.name,
-                text,
-                time: now
-            });
-            
-            save('ekb_chat', chatMessages);
-            input.value = '';
-            renderChat();
-            showToast('Сообщение отправлено', '💬');
-        }
 
-        // Запросы
-        window.openNewRequest = () => {
             const modal = document.createElement('div');
             modal.className = 'modal-overlay';
             modal.innerHTML = `
                 <div class="modal-card">
-                    <h3 class="mb-1">Новый запрос</h3>
-                    <input type="text" id="reqTitle" placeholder="Название проблемы">
-                    <select id="reqCategory" style="margin-bottom: 1rem;">
-                        <option value="Мусор">Мусор</option>
-                        <option value="Дороги">Дороги</option>
-                        <option value="Освещение">Освещение</option>
-                        <option value="Парки">Парки</option>
-                        <option value="Другое">Другое</option>
+                    <h3 class="mb-1">Создать новый квест</h3>
+                    <input type="text" id="questTitle" maxlength="50" placeholder="Название квеста (до 50 символов)">
+                    <textarea id="questDesc" rows="3" maxlength="220" placeholder="Описание задания (до 220 символов)"></textarea>
+                    <input type="file" id="questImage" accept="image/*" style="margin-bottom: 0.75rem;">
+                    <div id="questImagePreview" style="display:none; margin-bottom: 0.75rem;"></div>
+                    <div id="selectedLocationInfo" class="text-muted" style="font-size: 0.85rem; margin-bottom: 0.5rem;">Выберите адрес или место на карте.</div>
+                    <button class="btn btn-secondary mb-1" id="pickQuestLocationBtn" style="width: 100%;">Выбрать место на карте</button>
+                    <select id="questAddress">
+                        <option value="">Выберите адрес</option>
+                        ${EKIBASTUZ_ADDRESSES.map(addr =>
+                `<option value="${addr.name}|${addr.lat}|${addr.lng}">${addr.name}</option>`
+            ).join('')}
                     </select>
-                    <textarea id="reqDesc" rows="3" placeholder="Опишите проблему подробно..."></textarea>
-                    <div class="photo-upload-btn" onclick="document.getElementById('reqPhotoInput').click()">
-                        <i class="fas fa-camera" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
-                        <p>Прикрепить фото (необязательно)</p>
+                    <div class="grid-2">
+                        <input type="number" id="questXP" placeholder="Награда XP" value="100">
+                        <input type="number" id="questCoins" placeholder="Награда монет" value="50">
                     </div>
-                    <input type="file" id="reqPhotoInput" accept="image/*" style="display: none;" onchange="handleReqPhotoUpload(event)">
-                    <img id="reqPhotoPreview" class="photo-preview" style="display: none;">
+                    <label style="display: flex; align-items: center; gap: 8px; margin: 1rem 0;">
+                        <input type="checkbox" id="questUrgent">
+                        <span>Срочный квест</span>
+                    </label>
                     <div class="grid-2">
                         <button class="btn btn-outline" onclick="this.closest('.modal-overlay').remove()">Отмена</button>
-                        <button class="btn btn-primary" onclick="submitRequest()">Отправить</button>
+                        <button class="btn btn-primary" onclick="saveNewQuest()">Сохранить</button>
                     </div>
                 </div>
             `;
             document.body.appendChild(modal);
-        };
 
-        window.handleReqPhotoUpload = (event) => {
-            const file = event.target.files[0];
-            if (file) {
+            const questImageInput = modal.querySelector('#questImage');
+            const questImagePreview = modal.querySelector('#questImagePreview');
+
+            questImageInput.addEventListener('change', () => {
+                const file = questImageInput.files[0];
+                if (!file) {
+                    questImagePreview.style.display = 'none';
+                    questImagePreview.innerHTML = '';
+                    return;
+                }
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    const preview = document.getElementById('reqPhotoPreview');
-                    preview.src = e.target.result;
-                    preview.style.display = 'block';
+                reader.onload = () => {
+                    questImagePreview.style.display = 'block';
+                    questImagePreview.innerHTML = `<img src="${reader.result}" alt="Фото квеста" style="width:100%; border-radius: 12px; max-height: 120px; object-fit: cover;">`;
                 };
                 reader.readAsDataURL(file);
+            });
+        };
+
+        window.saveNewQuest = () => {
+            const title = document.getElementById('questTitle').value.trim();
+            const desc = document.getElementById('questDesc').value.trim();
+            const addressData = document.getElementById('questAddress').value;
+            const xp = parseInt(document.getElementById('questXP').value) || 100;
+            const coins = parseInt(document.getElementById('questCoins').value) || 50;
+            const isUrgent = document.getElementById('questUrgent').checked;
+            const imageFile = document.getElementById('questImage').files[0];
+
+            if (!title || !desc || (!addressData && !newQuestLocation)) {
+                showToast('Заполните название, описание и место', '⚠️');
+                return;
+            }
+
+            const finalTitle = title.slice(0, 50);
+            const finalDesc = desc.slice(0, 220);
+            const cost = currentUser.role !== 'moderator' ? Math.max(40, Math.round((xp + coins) * 0.25)) : 0;
+            if (cost && currentUser.points < cost) {
+                showToast(`Недостаточно монет для создания квеста — ${cost} 🪙`, '💸');
+                return;
+            }
+
+            const createQuest = (imageData) => {
+                let lat, lng, address;
+                if (newQuestLocation) {
+                    lat = newQuestLocation.lat;
+                    lng = newQuestLocation.lng;
+                    address = 'Метка на карте';
+                } else {
+                    [address, lat, lng] = addressData.split('|');
+                    lat = parseFloat(lat);
+                    lng = parseFloat(lng);
+                }
+
+                if (cost) {
+                    currentUser.points -= cost;
+                    syncCurrentUser();
+                }
+
+                quests.push({
+                    id: 'q_' + Date.now(),
+                    title: finalTitle,
+                    description: finalDesc,
+                    xpReward: xp,
+                    coinReward: coins,
+                    lat,
+                    lng,
+                    address,
+                    creatorId: currentUser.id,
+                    status: 'pending',
+                    isUrgent,
+                    image: imageData || ''
+                });
+
+                save('ekb_quests', quests);
+                showToast(cost ? `Квест создан за ${cost} 🪙 и отправлен на модерацию` : 'Квест отправлен на модерацию', '✅');
+                document.querySelector('.modal-overlay').remove();
+                renderMap();
+            };
+
+            if (imageFile) {
+                const reader = new FileReader();
+                reader.onload = () => createQuest(reader.result);
+                reader.readAsDataURL(imageFile);
+            } else {
+                createQuest('');
             }
         };
 
-        function submitRequest() {
-            const title = document.getElementById('reqTitle').value.trim();
-            const category = document.getElementById('reqCategory').value;
-            const desc = document.getElementById('reqDesc').value.trim();
-            const photo = document.getElementById('reqPhotoPreview').src;
-            
-            if (!title || !desc) return showToast('Заполните все поля!', '⚠️');
-            
-            requests.push({
-                id: 'req_' + Date.now(),
-                title,
-                category,
-                description: desc,
-                photo: photo && photo !== '' ? photo : null,
-                userId: currentUser.id,
-                userName: currentUser.name,
-                lat: currentUser.location.lat + (Math.random() - 0.5) * 0.01,
-                lng: currentUser.location.lng + (Math.random() - 0.5) * 0.01,
-                status: 'pending',
-                time: Date.now()
-            });
-            
-            save('ekb_requests', requests);
-            showToast('Запрос отправлен на рассмотрение', '📝');
-            document.querySelector('.modal-overlay').remove();
-            renderRequests();
-        }
-
-        window.approveRequest = (reqId) => {
-            const req = requests.find(r => r.id === reqId);
-            if (!req) return;
-            
-            // Создаем квест из запроса
-            quests.push({
-                id: 'q_' + Date.now(),
-                title: req.title,
-                description: req.description,
-                xpReward: 150,
-                coinReward: 75,
-                lat: req.lat,
-                lng: req.lng,
-                creatorId: 'mod_1',
-                status: 'active',
-                isUrgent: req.category === 'Мусор'
-            });
-            
-            req.status = 'approved';
-            save('ekb_quests', quests);
-            save('ekb_requests', requests);
-            
-            showToast('Квест создан из запроса!', '✅');
-            renderMod();
-            if (currentPage === 'map') refreshMapMarkers();
+        window.approveQuest = (questId) => {
+            const quest = quests.find(q => q.id === questId);
+            if (quest) {
+                quest.status = 'active';
+                save('ekb_quests', quests);
+                showToast('Квест одобрен!', '✅');
+                renderMod();
+            }
         };
 
-        window.rejectRequest = (reqId) => {
-            const req = requests.find(r => r.id === reqId);
-            if (!req) return;
-            
-            req.status = 'rejected';
-            save('ekb_requests', requests);
-            
-            showToast('Запрос отклонен', '❌');
-            renderMod();
-            if (currentPage === 'requests') renderRequests();
-        };
+        window.editQuest = (questId) => {
+            const quest = quests.find(q => q.id === questId);
+            if (!quest) return;
 
-        // Редактирование профиля
-        window.openEditProfile = () => {
             const modal = document.createElement('div');
             modal.className = 'modal-overlay';
             modal.innerHTML = `
                 <div class="modal-card">
-                    <h3 class="mb-1">Редактирование профиля</h3>
-                    <input type="text" id="editName" value="${currentUser.name}" placeholder="Имя">
-                    <input type="email" id="editEmail" value="${currentUser.email || ''}" placeholder="Email">
-                    <input type="text" id="editLogin" value="${currentUser.login}" placeholder="Логин">
-                    <input type="password" id="editPass" placeholder="Новый пароль (оставьте пустым если не менять)">
+                    <h3 class="mb-1">Редактировать квест</h3>
+                    <input type="text" id="editTitle" value="${quest.title}" placeholder="Название">
+                    <textarea id="editDesc" rows="3" placeholder="Описание">${quest.description}</textarea>
+                    <div class="grid-2">
+                        <input type="number" id="editXP" value="${quest.xpReward}" placeholder="Награда XP">
+                        <input type="number" id="editCoins" value="${quest.coinReward}" placeholder="Награда монет">
+                    </div>
                     <div class="grid-2">
                         <button class="btn btn-outline" onclick="this.closest('.modal-overlay').remove()">Отмена</button>
-                        <button class="btn btn-primary" onclick="saveProfile()">Сохранить</button>
+                        <button class="btn btn-primary" onclick="saveEditedQuest('${questId}')">Сохранить</button>
                     </div>
                 </div>
             `;
             document.body.appendChild(modal);
         };
 
-        window.saveProfile = () => {
-            const name = document.getElementById('editName').value.trim();
-            const email = document.getElementById('editEmail').value.trim();
-            const login = document.getElementById('editLogin').value.trim();
-            const pass = document.getElementById('editPass').value.trim();
-            
-            if (!name || !login) return showToast('Имя и логин обязательны!', '⚠️');
-            if (email && !isValidEmail(email)) return showToast('Некорректный email!', '⚠️');
-            
-            currentUser.name = name;
-            currentUser.email = email;
-            currentUser.login = login;
-            if (pass) currentUser.password = pass;
-            
-            syncCurrentUser();
-            showToast('Профиль обновлен!', '✅');
-            document.querySelector('.modal-overlay').remove();
-            renderProfile();
+        window.saveEditedQuest = (questId) => {
+            const quest = quests.find(q => q.id === questId);
+            if (quest) {
+                quest.title = document.getElementById('editTitle').value;
+                quest.description = document.getElementById('editDesc').value;
+                quest.xpReward = parseInt(document.getElementById('editXP').value) || 100;
+                quest.coinReward = parseInt(document.getElementById('editCoins').value) || 50;
+
+                save('ekb_quests', quests);
+                showToast('Изменения сохранены', '✅');
+                document.querySelector('.modal-overlay').remove();
+                renderMod();
+            }
         };
 
         // ==========================================
@@ -1701,10 +1940,14 @@
             const root = document.getElementById('appRoot');
             root.innerHTML = `
                 <div class="card text-center" style="margin-top: 2rem; padding: 3rem 1rem;">
-                    <div class="avatar-lg mb-1">🕵️</div>
-                    <h2>Добро пожаловать в Экибастуз</h2>
-                    <p class="text-muted mb-1">Чтобы брать квесты, делать покупки и получать уровни, нужно войти в систему.</p>
-                    <button class="btn btn-primary" onclick="showLoginModal()"><i class="fas fa-sign-in-alt"></i> Войти / Создать</button>
+                    <div class="avatar-lg mb-1">
+                        <img src="https://picsum.photos/seed/guest/100/100" alt="Гость">
+                    </div>
+                    <h2>Добро пожаловать в ECO JuniorCode</h2>
+                    <p class="text-muted mb-1">Войдите, чтобы выполнять квесты и получать награды</p>
+                    <button class="btn btn-primary" onclick="showLoginModal()">
+                        <i class="fas fa-sign-in-alt"></i> Войти / Регистрация
+                    </button>
                 </div>
             `;
         }
@@ -1715,12 +1958,12 @@
             modal.innerHTML = `
                 <div class="modal-card">
                     <h2 class="mb-1 text-center">Вход в систему</h2>
-                    <input type="text" id="authLogin" placeholder="Логин или Email">
-                    <input type="password" id="authPass" placeholder="Пароль">
-                    <button class="btn btn-primary mb-1" style="width:100%" id="authBtn">Войти</button>
-                    <div class="text-center text-muted" style="font-size:0.8rem">
-                        Для модератора: moderationforsitebeta67 / 12345676767aoao<br>
-                        Или введи новые данные для регистрации.
+                    <input type="text" id="authLogin" maxlength="32" placeholder="Логин или Email">
+                    <input type="password" id="authPass" maxlength="32" placeholder="Пароль">
+                    <button class="btn btn-primary mb-1" style="width: 100%;" id="authBtn">Войти</button>
+                    <div class="text-center text-muted" style="font-size: 0.8rem;">
+                        Модератор: moderationforsitebeta67 / 12345676767aoao<br>
+                        Или введите новые данные для регистрации
                     </div>
                 </div>
             `;
@@ -1729,71 +1972,69 @@
             modal.querySelector('#authBtn').onclick = () => {
                 const l = modal.querySelector('#authLogin').value.trim();
                 const p = modal.querySelector('#authPass').value.trim();
-                if (!l || !p) return showToast('Заполни поля');
+                if (!l || !p) return showToast('Заполните поля');
 
-                // Проверяем если это email
-                const isEmail = isValidEmail(l);
-
-                let user = allUsers.find(u => {
-                    if (isEmail) {
-                        return u.email === l && u.password === p;
-                    } else {
-                        return u.login === l && u.password === p;
-                    }
-                });
+                let user = allUsers.find(u => (u.login === l || u.email === l) && u.password === p);
 
                 if (!user) {
-                    // Авто-рега
-                    if (isEmail && !isValidEmail(l)) {
-                        return showToast('Некорректный email!', '⚠️');
-                    }
+                    const displayName = l.split('@')[0].slice(0, 16);
                     user = {
                         id: 'u_' + Date.now(),
-                        name: l.split('@')[0],
-                        email: isEmail ? l : '',
-                        login: isEmail ? l.split('@')[0] : l,
+                        name: displayName || 'Новый игрок',
+                        email: l,
+                        login: l,
                         password: p,
                         points: 50,
                         xp: 0,
                         level: 1,
-                        avatar: '👤',
+                        avatar: `https://picsum.photos/seed/${l}/100/100`,
                         background: '',
                         completedQuests: [],
                         location: EKIBASTUZ_COORDS,
                         role: 'user',
                         inventory: [],
                         activeBoosts: [],
+                        frame: '',
                         isOnline: true
                     };
                     allUsers.push(user);
                     save('ekb_users', allUsers);
                     showToast('Аккаунт создан!', '🎉');
                 } else {
+                    user.isOnline = true;
                     showToast('Успешный вход!', '🔓');
                 }
 
                 currentUser = user;
-                updateUserStats();
                 updateNavForRole();
                 modal.remove();
 
-                if (mapInstance) mapInstance.setView([EKIBASTUZ_COORDS.lat, EKIBASTUZ_COORDS.lng], 14);
+                if (mapInstance) {
+                    mapInstance.setView([currentUser.location.lat, currentUser.location.lng], 14);
+                    refreshMapMarkers();
+                }
                 renderCurrentPage();
             };
-        };
+        }
 
         window.logout = () => {
+            if (currentUser) {
+                currentUser.isOnline = false;
+                const dbU = allUsers.find(u => u.id === currentUser.id);
+                if (dbU) dbU.isOnline = false;
+                save('ekb_users', allUsers);
+            }
+
             currentUser = null;
-            updateUserStats();
             updateNavForRole();
             currentPage = 'map';
             updateNavUI();
             renderCurrentPage();
-            showToast('Вы вышли', '👋');
-        };
+            showToast('Вы вышли из аккаунта', '👋');
+        }
 
         // ==========================================
-        // НАВИГАЦИЯ И ЯДРО
+        // НАВИГАЦИЯ
         // ==========================================
         function updateNavForRole() {
             const nav = document.getElementById('bottomNav');
@@ -1804,7 +2045,7 @@
                     const btn = document.createElement('button');
                     btn.className = 'bottom-nav-btn';
                     btn.dataset.page = 'mod';
-                    btn.innerHTML = '<i class="fas fa-shield-alt"></i><span>Управ.</span>';
+                    btn.innerHTML = '<i class="fas fa-shield-alt"></i><span>Модер.</span>';
                     btn.onclick = () => navigateTo('mod');
                     nav.appendChild(btn);
                 }
@@ -1834,31 +2075,25 @@
 
             if (currentPage === 'map') renderMap();
             else if (currentPage === 'quests') renderQuests();
-            else if (currentPage === 'requests') renderRequests();
-            else if (currentPage === 'chat') renderChat();
+            else if (currentPage === 'donations') renderDonations();
             else if (currentPage === 'shop') renderShop();
             else if (currentPage === 'profile') renderProfile();
             else if (currentPage === 'mod') renderMod();
         }
-
-        // Биндинг кнопок меню
+ф
+        // Биндинг навигации
         document.querySelectorAll('.bottom-nav-btn').forEach(btn => {
             btn.addEventListener('click', () => navigateTo(btn.dataset.page));
         });
 
         // Запуск
         window.onload = () => {
-            // Загрузка темы
-            const savedTheme = localStorage.getItem('ekb_theme') || 'dark';
-            document.body.setAttribute('data-theme', savedTheme);
-            document.getElementById('themeIcon').className = savedTheme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
-
             initData();
             simulateOnlineUsers();
             renderCurrentPage();
 
             setTimeout(() => {
-                showToast('Добро пожаловать в Экибастуз!', '🏙️');
+                showToast('Добро пожаловать в ECO JuniorCode! 🌱', '🏙️');
             }, 1000);
         };
     </script>
