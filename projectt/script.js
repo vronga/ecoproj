@@ -213,7 +213,7 @@ function initData() {
     if (!localStorage.getItem('ekb_shop')) {
         shopItems = [
             // Аватары
-            { id: 's_av1', type: 'avatar', value: 'texture/avv1.jfif', price: 300 },
+            { id: 's_av1', type: 'avatar', src: 'texture/avv1.jfif', price: 300 },
             { id: 's_av2', type: 'avatar', value: 'texture/avv2.jfif', price: 250 },
             { id: 's_av3', type: 'avatar', value: 'texture/avv3.jfif', price: 400 },
             { id: 's_av4', type: 'avatar', value: 'texture/avv4.jfif', price: 500 },
