@@ -1,4 +1,5 @@
-
+// В самом начале, после переменных
+const IMG_PATH = 'texture/'; // или 'images/', или '/assets/'
 // ==========================================
 // ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
 // ==========================================
@@ -212,16 +213,16 @@ function initData() {
     // Магазин
     if (!localStorage.getItem('ekb_shop')) {
         shopItems = [
-            // Аватары
-            { id: 's_av1', type: 'avatar', src: 'texture/avv1.jfif', price: 300 },
-            { id: 's_av2', type: 'avatar', value: 'texture/avv2.jfif', price: 250 },
-            { id: 's_av3', type: 'avatar', value: 'texture/avv3.jfif', price: 400 },
-            { id: 's_av4', type: 'avatar', value: 'texture/avv4.jfif', price: 500 },
-            // Фоны
+            { id: 's_av1', type: 'avatar', value: 'avv1.jfif', price: 300 },
+            { id: 's_av2', type: 'avatar', value: 'avv2.jfif', price: 250 },
+            { id: 's_av3', type: 'avatar', value: 'avv3.jfif', price: 400 },
+            { id: 's_bg1', name: 'Фон 1', type: 'background', value: 'fonn1.jfif', price: 800 },
+
             { id: 's_bg1', name: 'фывфывфвф', type: 'background', value: 'texture/fonn1.jfif', price: 800 },
             { id: 's_bg2', name: 'Зелёный оазис', type: 'background', value: 'texture/fonn2.jfif', price: 600 },
             { id: 's_bg3', name: 'Горный закат', type: 'background', value: 'texture/fonn3.jfif', price: 1200 }
         ];
+            
         save('ekb_shop', shopItems);
     } else shopItems = load('ekb_shop');
 
